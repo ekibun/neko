@@ -3,12 +3,13 @@
  * @Author: ekibun
  * @Date: 2020-06-24 20:26:20
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-18 15:14:05
+ * @LastEditTime: 2020-07-18 23:31:20
  */
 
 import 'package:neko/page/home.dart';
 import 'package:neko/page/search.dart';
 import 'package:flutter/material.dart';
+import 'package:neko/page/test.dart';
 
 import 'lifecycle.dart';
 
@@ -36,7 +37,7 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         'home': (BuildContext context) => HomePage(),
-        'search': (BuildContext context) => SearchPage(),
+        'search': (BuildContext context) => TestPage(),
       },
       initialRoute: 'home',
     );
