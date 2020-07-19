@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-18 16:22:37
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-19 11:41:25
+ * @LastEditTime: 2020-07-19 13:15:29
  */ 
 #include "include/flutter_js/flutter_js_plugin.h"
 
@@ -103,24 +103,28 @@ void FlutterJsPlugin::HandleMethodCall(
     std::cout << engineId << std::endl;
     qjs::Runtime* runtime = new qjs::Runtime();
     qjs::Context* context = new qjs::Context(*runtime);
-    // std::cout << context.eval("1+1", "<test>").as<int>() << std::endl;
     jsEngineMap[engineId] = context;
     flutter::EncodableValue response(engineId);
     result->Success(&response);
   } else if (method_call.method_name().compare("evaluate") == 0) {
     flutter::EncodableMap args = method_call.arguments()->MapValue();
+    std::string command = ValueOrNull(args, "command").StringValue();
+    int engineId = ValueOrNull(args, "engineId").IntValue();
+    auto ctx = jsEngineMap.at(engineId);
     try
     {
-      std::string command = ValueOrNull(args, "command").StringValue();
-      int engineId = ValueOrNull(args, "engineId").IntValue();
-      auto resultJS = jsEngineMap.at(engineId)->eval(command).as<std::string>();
-      std::cout << resultJS << std::endl;
-      flutter::EncodableValue response(resultJS);
+      auto resultJS = ctx->eval(command);
+      flutter::EncodableValue response(resultJS.toJSON());
       result->Success(&response);
     }
-    catch(const qjs::exception& e)
+    catch(qjs::exception)
     {
-      result->Error("FlutterJSException", "error");
+      auto exc = ctx->getException();
+      std::string err = (std::string) exc;
+      if((bool) exc["stack"])
+            err += "\n" + (std::string) exc["stack"];
+      std::cerr << err << std::endl;
+      result->Error("FlutterJSException", err);
     }
   } else if (method_call.method_name().compare("close") == 0) {
     flutter::EncodableMap args = method_call.arguments()->MapValue();
@@ -129,6 +133,7 @@ void FlutterJsPlugin::HandleMethodCall(
       delete jsEngineMap.at(engineId);
       jsEngineMap.erase(engineId);
     }
+    result->Success();
   } else {
     result->NotImplemented();
   }

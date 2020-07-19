@@ -1,5 +1,6 @@
 {
   "files.associations": {
+    "ostream": "cpp",
     "algorithm": "cpp",
     "cctype": "cpp",
     "chrono": "cpp",
@@ -25,7 +26,6 @@
     "memory": "cpp",
     "new": "cpp",
     "numeric": "cpp",
-    "ostream": "cpp",
     "ratio": "cpp",
     "set": "cpp",
     "sstream": "cpp",

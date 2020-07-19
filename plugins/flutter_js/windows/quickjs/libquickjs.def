@@ -1,10 +1,14 @@
 EXPORTS
 JS_AddIntrinsicAtomics
 JS_AddIntrinsicBaseObjects
+JS_AddIntrinsicBigDecimal
+JS_AddIntrinsicBigFloat
+JS_AddIntrinsicBigInt
 JS_AddIntrinsicDate
 JS_AddIntrinsicEval
 JS_AddIntrinsicJSON
 JS_AddIntrinsicMapSet
+JS_AddIntrinsicOperators
 JS_AddIntrinsicPromise
 JS_AddIntrinsicProxy
 JS_AddIntrinsicRegExp
@@ -33,7 +37,8 @@ JS_DetachArrayBuffer
 JS_DetectModule
 JS_DumpMemoryUsage
 JS_DupAtom
-JS_EnableIsErrorProperty
+JS_DupContext
+JS_EnableBignumExt
 JS_EnqueueJob
 JS_Eval
 JS_EvalFunction
@@ -59,6 +64,7 @@ JS_GetPropertyStr
 JS_GetPropertyUint32
 JS_GetPrototype
 JS_GetRuntime
+JS_GetRuntimeOpaque
 JS_GetTypedArrayBuffer
 JS_HasProperty
 JS_Invoke
@@ -68,13 +74,12 @@ JS_IsConstructor
 JS_IsError
 JS_IsExtensible
 JS_IsFunction
-JS_IsInGCSweep
 JS_IsInstanceOf
 JS_IsJobPending
 JS_IsLiveObject
-JS_IsNumber
 JS_IsRegisteredClass
 JS_IsUncatchableError
+JS_JSONStringify
 JS_MarkValue
 JS_NewArray
 JS_NewArrayBuffer
@@ -83,6 +88,9 @@ JS_NewAtom
 JS_NewAtomLen
 JS_NewAtomString
 JS_NewAtomUInt32
+JS_NewBigInt64
+JS_NewBigInt64_1
+JS_NewBigUint64
 JS_NewCFunction2
 JS_NewCFunctionData
 JS_NewCModule
@@ -91,7 +99,6 @@ JS_NewClassID
 JS_NewContext
 JS_NewContextRaw
 JS_NewError
-JS_NewInt64
 JS_NewObject
 JS_NewObjectClass
 JS_NewObjectProto
@@ -102,6 +109,7 @@ JS_NewRuntime2
 JS_NewString
 JS_NewStringLen
 JS_ParseJSON
+JS_ParseJSON2
 JS_PreventExtensions
 JS_ReadObject
 JS_ResetUncatchableError
@@ -110,8 +118,10 @@ JS_RunGC
 JS_SetCanBlock
 JS_SetClassProto
 JS_SetConstructor
+JS_SetConstructorBit
 JS_SetContextOpaque
 JS_SetGCThreshold
+JS_SetHostPromiseRejectionTracker
 JS_SetInterruptHandler
 JS_SetMaxStackSize
 JS_SetMemoryLimit
@@ -126,6 +136,8 @@ JS_SetPropertyStr
 JS_SetPropertyUint32
 JS_SetPrototype
 JS_SetRuntimeInfo
+JS_SetRuntimeOpaque
+JS_SetSharedArrayBufferFunctions
 JS_SetUncatchableError
 JS_Throw
 JS_ThrowInternalError
@@ -134,6 +146,7 @@ JS_ThrowRangeError
 JS_ThrowReferenceError
 JS_ThrowSyntaxError
 JS_ThrowTypeError
+JS_ToBigInt64
 JS_ToBool
 JS_ToCStringLen2
 JS_ToFloat64
@@ -143,12 +156,14 @@ JS_ToInt32Clamp
 JS_ToInt32Sat
 JS_ToInt64
 JS_ToInt64Clamp
+JS_ToInt64Ext
 JS_ToInt64Sat
 JS_ToPropertyKey
 JS_ToString
 JS_ToStringInternal
 JS_ValueToAtom
 JS_WriteObject
+JS_WriteObject2
 __JS_FreeValue
 __JS_FreeValueRT
 js_free
@@ -172,7 +187,9 @@ js_std_add_helpers
 js_std_dump_error
 js_std_eval_binary
 js_std_free_handlers
+js_std_init_handlers
 js_std_loop
+js_std_promise_rejection_tracker
 js_strdup
 js_string_codePointRange
 js_strndup
