@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-18 16:22:37
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-19 13:15:29
+ * @LastEditTime: 2020-07-20 15:04:30
  */ 
 #include "include/flutter_js/flutter_js_plugin.h"
 
@@ -22,6 +22,7 @@
 #include <sstream>
 
 #include "quickjs/quickjspp.hpp"
+#include <future>
 
 namespace {
 
@@ -58,12 +59,12 @@ void FlutterJsPlugin::RegisterWithRegistrar(
   registrar->AddPlugin(std::move(plugin));
 }
 
-std::map<int,qjs::Context*> jsEngineMap;
+// std::map<int,qjs::Runtime*> jsEngineMap;
 
 FlutterJsPlugin::FlutterJsPlugin() {}
 
 FlutterJsPlugin::~FlutterJsPlugin() {
-  jsEngineMap.clear();
+  // jsEngineMap.clear();
 }
 
 // Looks for |key| in |map|, returning the associated value if it is present, or
@@ -75,6 +76,10 @@ const flutter::EncodableValue &ValueOrNull(const flutter::EncodableMap &map, con
     return null_value;
   }
   return it->second;
+}
+
+void println(std::string data){
+  std::cout << data << std::endl;
 }
 
 void FlutterJsPlugin::HandleMethodCall(
@@ -101,38 +106,66 @@ void FlutterJsPlugin::HandleMethodCall(
   } else if (method_call.method_name().compare("initEngine") == 0) {
     int engineId = method_call.arguments()->IntValue();
     std::cout << engineId << std::endl;
-    qjs::Runtime* runtime = new qjs::Runtime();
-    qjs::Context* context = new qjs::Context(*runtime);
-    jsEngineMap[engineId] = context;
+    // TODO use threadpool
+    // qjs::Runtime* runtime = new qjs::Runtime();
+    // jsEngineMap[engineId] = runtime;
+    // qjs::Context ctx(*runtime);
     flutter::EncodableValue response(engineId);
     result->Success(&response);
   } else if (method_call.method_name().compare("evaluate") == 0) {
     flutter::EncodableMap args = method_call.arguments()->MapValue();
     std::string command = ValueOrNull(args, "command").StringValue();
     int engineId = ValueOrNull(args, "engineId").IntValue();
-    auto ctx = jsEngineMap.at(engineId);
-    try
-    {
-      auto resultJS = ctx->eval(command);
-      flutter::EncodableValue response(resultJS.toJSON());
-      result->Success(&response);
-    }
-    catch(qjs::exception)
-    {
-      auto exc = ctx->getException();
-      std::string err = (std::string) exc;
-      if((bool) exc["stack"])
-            err += "\n" + (std::string) exc["stack"];
-      std::cerr << err << std::endl;
-      result->Error("FlutterJSException", err);
-    }
+    // qjs::Runtime* runtime = jsEngineMap.at(engineId);
+    std::async(std::launch::async, [&result, &command]() {
+      qjs::Runtime runtime;
+      qjs::Context ctx(runtime);
+      JSContext* pctx = ctx.ctx;
+      try
+      {
+        auto &module = ctx.addModule("__WindowsBaseMoudle");
+        module.function<&println>("println");
+        ctx.global()["_result"] = ctx.newValue((HANDLE) &result);
+        ctx.eval(R"xxx(
+          import * as __WindowsBaseMoudle from "__WindowsBaseMoudle";
+          globalThis.print = (...a) => __WindowsBaseMoudle.println(a.join(' '));
+        )xxx", "<init>", JS_EVAL_TYPE_MODULE);
+        std::string cmd = "const __ret = Promise.resolve(eval(" + command + ")).then(ret => __ret.__value = ret); __ret";
+        std::cout << cmd << std::endl;
+        auto ret = ctx.eval(cmd, "<eval>");
+        // js_std_loop(ctx.ctx);
+        pctx = nullptr;
+        for(;;) {
+          int err = JS_ExecutePendingJob(runtime.rt, &pctx);
+          if (err <= 0) {
+            if (err < 0)
+              throw qjs::exception{};
+            break;
+          }
+        }
+        std::string retValue = (std::string) ret["__value"];
+        std::cout << retValue << std::endl;
+        flutter::EncodableValue response(retValue);
+        result->Success(&response);
+      }
+      catch(qjs::exception)
+      {
+        auto exc = qjs::Value{pctx, JS_GetException(pctx)};
+        std::string err = (std::string) exc;
+        if((bool) exc["stack"])
+              err += "\n" + (std::string) exc["stack"];
+        std::cerr << err << std::endl;
+        result->Error("FlutterJSException", err);
+      }
+    });
   } else if (method_call.method_name().compare("close") == 0) {
     flutter::EncodableMap args = method_call.arguments()->MapValue();
-    int engineId = ValueOrNull(args, "engineId").IntValue();
-    if(jsEngineMap.count(engineId)) {
-      delete jsEngineMap.at(engineId);
-      jsEngineMap.erase(engineId);
-    }
+    // TODO
+    // int engineId = ValueOrNull(args, "engineId").IntValue();
+    // if(jsEngineMap.count(engineId)) {
+    //   delete jsEngineMap.at(engineId);
+    //   jsEngineMap.erase(engineId);
+    // }
     result->Success();
   } else {
     result->NotImplemented();
