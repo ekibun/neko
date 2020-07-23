@@ -3,11 +3,12 @@
  * @Author: ekibun
  * @Date: 2020-07-18 16:22:37
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-23 12:56:44
+ * @LastEditTime: 2020-07-24 00:15:19
  */
 #include "include/flutter_js/flutter_js_plugin.h"
 
 // This must be included before many other Windows headers.
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 // For getPlatformVersion; remove unless needed for your plugin implementation.
@@ -135,7 +136,7 @@ namespace
       int engineId = ValueOrNull(args, "engineId").IntValue();
       // qjs::Runtime* runtime = jsEngineMap.at(engineId);
       auto presult = result.release();
-      async([presult, command]() {
+      async2([presult, command]() {
         qjs::Runtime runtime;
         js_std_init_handlers(runtime.rt);
         qjs::Context ctx(runtime);
@@ -145,10 +146,12 @@ namespace
           auto &module = ctx.addModule("__WindowsBaseMoudle");
           module
               .function<&println>("println")
-              .function<&js_os_setTimeout>("setTimeout");
+              .function<&js_os_setTimeout>("setTimeout")
+              .function<&js_os_http_get>("http");
           ctx.eval(R"xxx(
           import * as __WindowsBaseMoudle from "__WindowsBaseMoudle";
           globalThis.print = (...a) => __WindowsBaseMoudle.println(a.join(' '));
+          globalThis.http = (url) => new Promise((res) => __WindowsBaseMoudle.http(res, url));
           globalThis.delay = (delayMs) => new Promise((res) => __WindowsBaseMoudle.setTimeout(res, delayMs));
         )xxx",
                    "<init>", JS_EVAL_TYPE_MODULE);

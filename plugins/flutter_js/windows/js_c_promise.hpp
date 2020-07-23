@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-21 12:48:55
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-23 13:04:49
+ * @LastEditTime: 2020-07-24 00:16:44
  */
 #pragma once
 
@@ -11,11 +11,12 @@
 #include "quickjs/quickjs/list.h"
 #include "quickjs/quickjspp.hpp"
 #include <future>
+#include "requests/requests.h"
 
 static JSClassID js_promise_class_id;
 
 template <typename F, typename... Args>
-auto async(F &&f, Args &&... args)
+auto async2(F &&f, Args &&... args)
     -> std::shared_future<typename std::result_of<F(Args...)>::type>
 {
   using _Ret = typename std::result_of<F(Args...)>::type;
@@ -74,15 +75,36 @@ static JSValue js_add_future(qjs::Value cb, std::shared_future<std::function<JSO
 }
 
 JSValue js_os_setTimeout(qjs::Value cb, int64_t delay) {
-  return js_add_future(cb, async([delay]() {
+  return js_add_future(cb, async2([delay]() {
     std::cout << "begin timeout:" << delay << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
     std::cout << "end timeout:" << delay << std::endl;
     return (std::function<JSOSFutureArgv(JSContext *)>) [](JSContext *ctx) { 
-      JSValue ret[1] = { JS_DupValue(ctx, JS_NewString(ctx, "hello")) };
+      // JSValue ret[1] = { JS_EXCEPTION }; // { JS_DupValue(ctx, JS_NewString(ctx, "hello")) };
+      return JSOSFutureArgv { 0, nullptr };
+    };
+  }));
+}
+
+JSValue js_os_http_get(qjs::Value cb, std::string url) {    
+  return js_add_future(cb, async2([url]() {
+    std::cout << "begin request:" << url << std::endl;
+    auto rsp = requests::Get(url);
+    std::cout << "end request:" << url  << rsp.status << std::endl;
+    return (std::function<JSOSFutureArgv(JSContext *)>) [rspstr = rsp.GetText()](JSContext *ctx) { 
+      JSValue ret[1] = { JS_DupValue(ctx, JS_NewString(ctx, rspstr.c_str())) };
       return JSOSFutureArgv { 1, ret };
     };
   }));
+  
+  
+  // return js_add_future(cb, async([url]() {
+    
+  //   return (std::function<JSOSFutureArgv(JSContext *)>) [](JSContext *ctx) { 
+  //     // JSValue ret[1] = { JS_EXCEPTION }; // { JS_DupValue(ctx, JS_NewString(ctx, "hello")) };
+  //     return JSOSFutureArgv { 0, nullptr };
+  //   };
+  // }));
 }
 
 static void unlink_future(JSRuntime *rt, JSOSFuture *th)
