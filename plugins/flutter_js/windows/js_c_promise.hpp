@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-21 12:48:55
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-22 14:31:59
+ * @LastEditTime: 2020-07-23 13:04:49
  */
 #pragma once
 
@@ -15,8 +15,8 @@
 static JSClassID js_promise_class_id;
 
 template <typename F, typename... Args>
-auto really_async2(F &&f, Args &&... args)
-    -> std::future<typename std::result_of<F(Args...)>::type>
+auto async(F &&f, Args &&... args)
+    -> std::shared_future<typename std::result_of<F(Args...)>::type>
 {
   using _Ret = typename std::result_of<F(Args...)>::type;
   auto _func = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
@@ -36,7 +36,7 @@ typedef struct
 typedef struct
 {
   struct list_head link;
-  std::future<std::function<JSOSFutureArgv(JSContext *)>> future;
+  std::shared_future<std::function<JSOSFutureArgv(JSContext *)>> future;
   bool has_object;
   JSValue func;
 } JSOSFuture;
@@ -47,31 +47,34 @@ typedef struct JSThreadState
   int eval_script_recurse;    /* only used in the main thread */
 } JSThreadState;
 
-static JSValue js_os_setTimeout(JSContext *ctx, JSValueConst this_val,
-                                int argc, JSValueConst *argv)
-{
-  JSRuntime *rt = JS_GetRuntime(ctx);
+static JSValue js_add_future(qjs::Value cb, std::shared_future<std::function<JSOSFutureArgv(JSContext *)>> future){
+  JSRuntime *rt = JS_GetRuntime(cb.ctx);
   JSThreadState *ts = (JSThreadState *)JS_GetRuntimeOpaque(rt);
-  int64_t delay;
   JSValueConst func;
   JSOSFuture *th;
   JSValue obj;
 
-  func = argv[0];
-  if (!JS_IsFunction(ctx, func))
-    return JS_ThrowTypeError(ctx, "not a function");
-  if (JS_ToInt64(ctx, &delay, argv[1]))
-    return JS_EXCEPTION;
-  obj = JS_NewObjectClass(ctx, js_promise_class_id);
+  func = cb.v;
+  if (!JS_IsFunction(cb.ctx, func))
+    return JS_ThrowTypeError(cb.ctx, "not a function");
+  obj = JS_NewObjectClass(cb.ctx, js_promise_class_id);
   if (JS_IsException(obj))
     return obj;
-  th = (JSOSFuture *)js_mallocz(ctx, sizeof(*th));
+  th = (JSOSFuture *)js_mallocz(cb.ctx, sizeof(*th));
   if (!th)
   {
-    JS_FreeValue(ctx, obj);
+    JS_FreeValue(cb.ctx, obj);
     return JS_EXCEPTION;
   }
-  th->future = really_async2([delay, &ctx]() {
+  th->future = future;
+  th->func = JS_DupValue(cb.ctx, func);
+  list_add_tail(&th->link, &ts->os_future);
+  JS_SetOpaque(obj, th);
+  return obj;
+}
+
+JSValue js_os_setTimeout(qjs::Value cb, int64_t delay) {
+  return js_add_future(cb, async([delay]() {
     std::cout << "begin timeout:" << delay << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
     std::cout << "end timeout:" << delay << std::endl;
@@ -79,11 +82,7 @@ static JSValue js_os_setTimeout(JSContext *ctx, JSValueConst this_val,
       JSValue ret[1] = { JS_DupValue(ctx, JS_NewString(ctx, "hello")) };
       return JSOSFutureArgv { 1, ret };
     };
-  });
-  th->func = JS_DupValue(ctx, func);
-  list_add_tail(&th->link, &ts->os_future);
-  JS_SetOpaque(obj, th);
-  return obj;
+  }));
 }
 
 static void unlink_future(JSRuntime *rt, JSOSFuture *th)

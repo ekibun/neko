@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-18 16:22:37
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-22 14:24:42
+ * @LastEditTime: 2020-07-23 12:56:44
  */
 #include "include/flutter_js/flutter_js_plugin.h"
 
@@ -135,7 +135,7 @@ namespace
       int engineId = ValueOrNull(args, "engineId").IntValue();
       // qjs::Runtime* runtime = jsEngineMap.at(engineId);
       auto presult = result.release();
-      really_async2([presult, command]() {
+      async([presult, command]() {
         qjs::Runtime runtime;
         js_std_init_handlers(runtime.rt);
         qjs::Context ctx(runtime);
@@ -145,20 +145,19 @@ namespace
           auto &module = ctx.addModule("__WindowsBaseMoudle");
           module
               .function<&println>("println")
-              .add("setTimeout", JS_NewCFunction2(ctx.ctx, js_os_setTimeout, "setTimeout", 2, JS_CFUNC_generic, 0));
+              .function<&js_os_setTimeout>("setTimeout");
           ctx.eval(R"xxx(
           import * as __WindowsBaseMoudle from "__WindowsBaseMoudle";
           globalThis.print = (...a) => __WindowsBaseMoudle.println(a.join(' '));
           globalThis.delay = (delayMs) => new Promise((res) => __WindowsBaseMoudle.setTimeout(res, delayMs));
         )xxx",
                    "<init>", JS_EVAL_TYPE_MODULE);
-          auto retRaw = ctx.eval(command, "<eval>");
-          ctx.global()["__result"] = retRaw;
-          auto ret = ctx.eval("const __ret = Promise.resolve(__result).then(ret => __ret.__value = ret).catch(e => { throw e; }); __ret", "<eval>");
+          ctx.global()["__evalstr"] = JS_NewString(ctx.ctx, command.c_str());;
+          auto ret = ctx.eval("const __ret = Promise.resolve(eval(__evalstr)).then(ret => __ret.__value = ret).catch(e => { throw e; }); __ret", "<eval>");
           // js_std_loop(ctx.ctx);
           for (;;)
           {
-            pctx = nullptr;
+            // pctx = nullptr;
             for (;;)
             {
               int err = JS_ExecutePendingJob(runtime.rt, &pctx);
