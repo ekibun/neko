@@ -1,8 +1,5 @@
 #pragma once
 
-#include "quickjs/quickjs.h"
-// #include "quickjs/quickjs-libc.h"
-
 #include <vector>
 #include <string_view>
 #include <string>
@@ -15,6 +12,8 @@
 #include <stdexcept>
 
 namespace qjs {
+#include "quickjs/quickjs.h"
+#include "quickjs/quickjs-libc.h"
 
 
 /** Exception type.
@@ -1171,15 +1170,15 @@ public:
         return Value{ctx, v};
     }
 
-    // Value evalFile(const char * filename, unsigned eval_flags = 0)
-    // {
-    //     size_t buf_len;
-    //     auto deleter = [this](void * p) { js_free(ctx, p); };
-    //     auto buf = std::unique_ptr<uint8_t, decltype(deleter)>{js_load_file(ctx, &buf_len, filename), deleter};
-    //     if(!buf)
-    //         throw std::runtime_error{std::string{"evalFile: can't read file: "} + filename};
-    //     return eval({reinterpret_cast<char *>(buf.get()), buf_len}, filename, eval_flags);
-    // }
+    Value evalFile(const char * filename, unsigned eval_flags = 0)
+    {
+        size_t buf_len;
+        auto deleter = [this](void * p) { js_free(ctx, p); };
+        auto buf = std::unique_ptr<uint8_t, decltype(deleter)>{js_load_file(ctx, &buf_len, filename), deleter};
+        if(!buf)
+            throw std::runtime_error{std::string{"evalFile: can't read file: "} + filename};
+        return eval({reinterpret_cast<char *>(buf.get()), buf_len}, filename, eval_flags);
+    }
 
     Value fromJSON(std::string_view buffer, const char * filename = "<fromJSON>")
     {

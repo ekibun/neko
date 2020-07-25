@@ -1,0 +1,3 @@
+#include "resource.h"
+
+IDS_ENCODING script "script/encoding.js"

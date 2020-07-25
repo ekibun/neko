@@ -3,10 +3,11 @@
  * @Author: ekibun
  * @Date: 2020-07-21 12:48:55
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-24 00:16:44
+ * @LastEditTime: 2020-07-25 12:45:31
  */
 #pragma once
 
+#include <iostream>
 #include "quickjs/quickjs/quickjs.h"
 #include "quickjs/quickjs/list.h"
 #include "quickjs/quickjspp.hpp"
@@ -38,14 +39,12 @@ typedef struct
 {
   struct list_head link;
   std::shared_future<std::function<JSOSFutureArgv(JSContext *)>> future;
-  bool has_object;
   JSValue func;
 } JSOSFuture;
 
 typedef struct JSThreadState
 {
   struct list_head os_future; /* list of JSOSFuture.link */
-  int eval_script_recurse;    /* only used in the main thread */
 } JSThreadState;
 
 static JSValue js_add_future(qjs::Value cb, std::shared_future<std::function<JSOSFutureArgv(JSContext *)>> future){
@@ -88,23 +87,24 @@ JSValue js_os_setTimeout(qjs::Value cb, int64_t delay) {
 
 JSValue js_os_http_get(qjs::Value cb, std::string url) {    
   return js_add_future(cb, async2([url]() {
-    std::cout << "begin request:" << url << std::endl;
-    auto rsp = requests::Get(url);
-    std::cout << "end request:" << url  << rsp.status << std::endl;
-    return (std::function<JSOSFutureArgv(JSContext *)>) [rspstr = rsp.GetText()](JSContext *ctx) { 
-      JSValue ret[1] = { JS_DupValue(ctx, JS_NewString(ctx, rspstr.c_str())) };
-      return JSOSFutureArgv { 1, ret };
-    };
+    try {
+      auto rsp = requests::Get(url);
+      auto len = rsp.size();
+      uint8_t *buf = new uint8_t[len];
+      memcpy(buf, rsp.GetBinary(), len);
+      return (std::function<JSOSFutureArgv(JSContext *)>) [buf, len](JSContext *ctx) {
+        JSValue *ret = new JSValue { JS_NewArrayBufferCopy(ctx, buf, len) };
+        delete[] buf;
+        return JSOSFutureArgv { 1, ret };
+      };
+    } catch (char* err) {
+       return (std::function<JSOSFutureArgv(JSContext *)>) [err = std::string(err)](JSContext *ctx) {
+        char *e = (char *)js_malloc(ctx, err.size());
+        err.copy(e, err.size());
+        return JSOSFutureArgv { 1, new JSValue { JS_NewString(ctx, e) } };
+      };
+    }
   }));
-  
-  
-  // return js_add_future(cb, async([url]() {
-    
-  //   return (std::function<JSOSFutureArgv(JSContext *)>) [](JSContext *ctx) { 
-  //     // JSValue ret[1] = { JS_EXCEPTION }; // { JS_DupValue(ctx, JS_NewString(ctx, "hello")) };
-  //     return JSOSFutureArgv { 0, nullptr };
-  //   };
-  // }));
 }
 
 static void unlink_future(JSRuntime *rt, JSOSFuture *th)
@@ -144,11 +144,11 @@ void js_std_free_handlers(JSRuntime *rt)
   list_for_each_safe(el, el1, &ts->os_future)
   {
     JSOSFuture *th = list_entry(el, JSOSFuture, link);
-    th->future.wait();
+    th->future.get();
     unlink_future(rt, th);
     free_future(rt, th);
   }
-
+  
   free(ts);
   JS_SetRuntimeOpaque(rt, NULL); /* fail safe */
   std::cout << "runtime free" << std::endl;
@@ -159,11 +159,10 @@ static void call_handler(JSContext *ctx, JSValueConst func, int count, JSValue *
   JSValue ret, func1;
   /* 'func' might be destroyed when calling itself (if it frees the
        handler), so must take extra care */
+  uint8_t arr[100];
   func1 = JS_DupValue(ctx, func);
-  ret = JS_Call(ctx, func1, JS_UNDEFINED, count, const_cast<JSValueConst *>(argv));
+  ret = JS_Call(ctx, func1, JS_UNDEFINED, count, argv);
   JS_FreeValue(ctx, func1);
-  for(int i = 0; i < count; ++i)
-    JS_FreeValue(ctx, argv[i]);
   if (JS_IsException(ret))
     throw qjs::exception{};
   JS_FreeValue(ctx, ret);
@@ -186,8 +185,7 @@ static int js_os_poll(JSContext *ctx)
     list_for_each(el, &ts->os_future)
     {
       JSOSFuture *th = list_entry(el, JSOSFuture, link);
-      std::future_status status = th->future.wait_for(std::chrono::seconds(0));
-      if (status == std::future_status::ready)
+      if (th->future._Is_ready())
       {
         JSOSFutureArgv argv = th->future.get()(ctx);
         JSValue func;
@@ -196,10 +194,12 @@ static int js_os_poll(JSContext *ctx)
         func = th->func;
         th->func = JS_UNDEFINED;
         unlink_future(rt, th);
-        if (!th->has_object)
-          free_future(rt, th);
+        free_future(rt, th);
         call_handler(ctx, func, argv.count, argv.argv);
+        for(int i = 0; i < argv.count; ++i)
+          JS_FreeValue(ctx, argv.argv[i]);
         JS_FreeValue(ctx, func);
+        delete argv.argv;
         return 0;
       }
     }

@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-18 16:22:37
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-24 00:15:19
+ * @LastEditTime: 2020-07-25 14:50:39
  */
 #include "include/flutter_js/flutter_js_plugin.h"
 
@@ -23,9 +23,28 @@
 #include <sstream>
 
 #include "js_c_promise.hpp"
+#include "resource.h"
 
 namespace
 {
+  #if _MSC_VER >= 1400
+  EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+  inline HMODULE GetCurrentModuleHandle()
+  {
+    return (HMODULE)&__ImageBase;
+  };
+  #endif
+
+  //加载资源
+  std::string UseCustomResource(int rcId)
+  {
+    HMODULE phexmodule = GetCurrentModuleHandle();
+    HRSRC hRsrc = FindResource(phexmodule, MAKEINTRESOURCE(rcId), TEXT("script"));    
+    HGLOBAL hGlobal = LoadResource(phexmodule, hRsrc);
+    LPVOID pBuffer = LockResource(hGlobal);
+    DWORD resLength = SizeofResource(phexmodule, hRsrc);
+    return std::string((char * &)pBuffer).substr(0, resLength);
+  }
 
   class FlutterJsPlugin : public flutter::Plugin
   {
@@ -155,12 +174,13 @@ namespace
           globalThis.delay = (delayMs) => new Promise((res) => __WindowsBaseMoudle.setTimeout(res, delayMs));
         )xxx",
                    "<init>", JS_EVAL_TYPE_MODULE);
+          ctx.eval(UseCustomResource(IDS_ENCODING).c_str(), "<init:encoding>");
           ctx.global()["__evalstr"] = JS_NewString(ctx.ctx, command.c_str());;
           auto ret = ctx.eval("const __ret = Promise.resolve(eval(__evalstr)).then(ret => __ret.__value = ret).catch(e => { throw e; }); __ret", "<eval>");
           // js_std_loop(ctx.ctx);
+          JSContext *pctx;
           for (;;)
           {
-            // pctx = nullptr;
             for (;;)
             {
               int err = JS_ExecutePendingJob(runtime.rt, &pctx);
@@ -178,20 +198,18 @@ namespace
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
           }
           std::string retValue = (std::string)ret["__value"];
-          std::cout << retValue << std::endl;
           flutter::EncodableValue response(retValue);
           presult->Success(&response);
         }
         catch (qjs::exception)
         {
-          auto exc = qjs::Value{pctx, JS_GetException(pctx)};
+          auto exc = ctx.getException();
           std::string err = (std::string)exc;
           if ((bool)exc["stack"])
             err += "\n" + (std::string)exc["stack"];
           std::cerr << err << std::endl;
           presult->Error("FlutterJSException", err);
         }
-        delete presult;
         js_std_free_handlers(runtime.rt);
       });
     }

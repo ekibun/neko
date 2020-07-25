@@ -5,7 +5,7 @@ project(${PROJECT_NAME} LANGUAGES CXX)
 set(PLUGIN_NAME "${PROJECT_NAME}_plugin")
 
 add_library(${PLUGIN_NAME} SHARED
-  "${PLUGIN_NAME}.cpp" "requests/requests.cpp" "requests/utils.cpp"
+  "${PLUGIN_NAME}.cpp" "requests/requests.cpp" "requests/utils.cpp" "resource.rc"
 )
 apply_standard_settings(${PLUGIN_NAME})
 set_target_properties(${PLUGIN_NAME} PROPERTIES
