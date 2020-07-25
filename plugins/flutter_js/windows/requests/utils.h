@@ -13,8 +13,9 @@ std::wstring s2ws(const std::string& str);
 std::string  ws2s(const std::wstring &str);
 std::string to_lower(std::string str);
 
-namespace Base64
+class Base64
 {
+public:
 	std::string Encode(char* Data, int DataByte);
 	std::string Decode(const char* Data, int DataByte, int& OutByte);
 };
