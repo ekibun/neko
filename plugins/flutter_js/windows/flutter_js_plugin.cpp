@@ -3,13 +3,15 @@
  * @Author: ekibun
  * @Date: 2020-07-18 16:22:37
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-25 14:50:39
+ * @LastEditTime: 2020-07-26 14:31:02
  */
 #include "include/flutter_js/flutter_js_plugin.h"
 
 // This must be included before many other Windows headers.
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include "include/wil/com.h"
+#include <wrl.h>
 
 // For getPlatformVersion; remove unless needed for your plugin implementation.
 #include <VersionHelpers.h>
@@ -24,6 +26,8 @@
 
 #include "js_c_promise.hpp"
 #include "resource.h"
+
+#include "offscreen.hpp"
 
 namespace
 {
@@ -83,10 +87,13 @@ namespace
 
   // std::map<int,qjs::Runtime*> jsEngineMap;
 
-  FlutterJsPlugin::FlutterJsPlugin() {}
+  FlutterJsPlugin::FlutterJsPlugin() {
+    testWebView();
+  }
 
   FlutterJsPlugin::~FlutterJsPlugin()
   {
+    releaseWebview();
     // jsEngineMap.clear();
   }
 
