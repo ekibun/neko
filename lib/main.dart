@@ -7,7 +7,6 @@
  */
 
 import 'package:neko/page/home.dart';
-import 'package:neko/page/search.dart';
 import 'package:flutter/material.dart';
 import 'package:neko/page/test.dart';
 

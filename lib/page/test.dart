@@ -1,5 +1,13 @@
+/*
+ * @Description: 
+ * @Author: ekibun
+ * @Date: 2020-07-18 23:28:55
+ * @LastEditors: ekibun
+ * @LastEditTime: 2020-08-01 22:10:29
+ */ 
 import 'package:flutter/material.dart';
 import 'package:flutter_js/flutter_js.dart';
+import 'package:neko/widget/code/editor.dart';
 
 class TestPage extends StatefulWidget {
   @override
@@ -8,7 +16,7 @@ class TestPage extends StatefulWidget {
 
 class _TestPageState extends State<TestPage> {
 
-  String code, resp;
+  String code = "", resp;
   int id;
 
   @override
@@ -50,7 +58,7 @@ class _TestPageState extends State<TestPage> {
               padding: const EdgeInsets.all(12),
               color: Colors.grey.withOpacity(0.1),
               constraints: BoxConstraints(minHeight: 200),
-              child: TextField(
+              child: CodeEditor(
                 onChanged: (v) {
                   code = v;
                 },

@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-18 16:22:37
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-26 14:31:02
+ * @LastEditTime: 2020-08-01 15:23:52
  */
 #include "include/flutter_js/flutter_js_plugin.h"
 
@@ -88,12 +88,12 @@ namespace
   // std::map<int,qjs::Runtime*> jsEngineMap;
 
   FlutterJsPlugin::FlutterJsPlugin() {
-    testWebView();
+    // testWebView();
   }
 
   FlutterJsPlugin::~FlutterJsPlugin()
   {
-    releaseWebview();
+    // releaseWebview();
     // jsEngineMap.clear();
   }
 
