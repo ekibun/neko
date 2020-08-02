@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-18 16:22:37
  * @LastEditors: ekibun
- * @LastEditTime: 2020-08-01 15:23:52
+ * @LastEditTime: 2020-08-02 16:47:49
  */
 #include "include/flutter_js/flutter_js_plugin.h"
 
@@ -181,9 +181,10 @@ namespace
           globalThis.delay = (delayMs) => new Promise((res) => __WindowsBaseMoudle.setTimeout(res, delayMs));
         )xxx",
                    "<init>", JS_EVAL_TYPE_MODULE);
+          // TODO use JS_SetHostPromiseRejectionTracker
           ctx.eval(UseCustomResource(IDS_ENCODING).c_str(), "<init:encoding>");
-          ctx.global()["__evalstr"] = JS_NewString(ctx.ctx, command.c_str());;
-          auto ret = ctx.eval("const __ret = Promise.resolve(eval(__evalstr)).then(ret => __ret.__value = ret).catch(e => { throw e; }); __ret", "<eval>");
+          ctx.global()["__evalstr"] = JS_NewString(ctx.ctx, command.c_str());
+          auto ret = ctx.eval("const __ret = Promise.resolve(eval(__evalstr)).then(v => __ret.__value = v).catch(e => __ret.__error = e); __ret", "<eval>");
           // js_std_loop(ctx.ctx);
           JSContext *pctx;
           for (;;)
@@ -199,6 +200,10 @@ namespace
               }
             }
             if (ret["__value"]) break;
+            if (ret["__error"]) {
+              JS_Throw(ctx.ctx, JS_DupValue(ctx.ctx, ret["__error"].as<qjs::Value>().v));
+              throw qjs::exception{};
+            }
             pctx = ctx.ctx;
             if (js_os_poll(ctx.ctx))
               break;

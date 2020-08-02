@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-21 12:48:55
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-25 12:45:31
+ * @LastEditTime: 2020-08-02 16:45:24
  */
 #pragma once
 
@@ -98,10 +98,11 @@ JSValue js_os_http_get(qjs::Value cb, std::string url) {
         return JSOSFutureArgv { 1, ret };
       };
     } catch (char* err) {
-       return (std::function<JSOSFutureArgv(JSContext *)>) [err = std::string(err)](JSContext *ctx) {
+       return (std::function<JSOSFutureArgv(JSContext *)>) [err = std::string(err)](JSContext *ctx) -> JSOSFutureArgv {
         char *e = (char *)js_malloc(ctx, err.size());
         err.copy(e, err.size());
-        return JSOSFutureArgv { 1, new JSValue { JS_NewString(ctx, e) } };
+        JS_Throw(ctx, JS_DupValue(ctx, JS_NewString(ctx, e)));
+        throw qjs::exception {};
       };
     }
   }));

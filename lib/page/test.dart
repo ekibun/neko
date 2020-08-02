@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-18 23:28:55
  * @LastEditors: ekibun
- * @LastEditTime: 2020-08-01 22:10:29
+ * @LastEditTime: 2020-08-02 15:52:00
  */ 
 import 'package:flutter/material.dart';
 import 'package:flutter_js/flutter_js.dart';
@@ -43,7 +43,11 @@ class _TestPageState extends State<TestPage> {
                       print("请先初始化引擎");
                       return;
                     }
-                    resp = (await FlutterJs.evaluate(code, id)).toString();
+                    try {
+                      resp = await FlutterJs.evaluate(code, id);
+                    } catch(e) {
+                      resp = e.toString();
+                    }
                     setState(() {});
                   }),
                   FlatButton(child: Text("释放引擎"), onPressed: () async {
