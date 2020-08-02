@@ -3,8 +3,8 @@
  * @Author: ekibun
  * @Date: 2020-08-01 17:42:06
  * @LastEditors: ekibun
- * @LastEditTime: 2020-08-01 22:23:18
- */ 
+ * @LastEditTime: 2020-08-02 12:39:26
+ */
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
@@ -69,21 +69,27 @@ class CodeInputController extends TextEditingController {
     int splitAt = value.selection.start;
     if (splitAt < 0) splitAt = newText.length ~/ 2;
     int start = 0;
+    InlineSpan leftSpan;
     oldSpan.children?.indexWhere((element) {
       String elementText = element.toPlainText();
-      if (start + elementText.length > splitAt ||
-          !newText.startsWith(elementText, start)) return true;
+      if (start + elementText.length > splitAt || !newText.startsWith(elementText, start)) {
+        leftSpan = element;
+        return true;
+      }
       beforeSpans.add(element);
       start += elementText.length;
       return false;
     });
     List<TextSpan> endSpans = [];
     int end = 0;
+    InlineSpan rightSpan;
     oldSpan.children?.sublist(beforeSpans.length)?.lastIndexWhere((element) {
       String elementText = element.toPlainText();
       if (splitAt + end + elementText.length >= newText.length ||
-          !newText.substring(start, newText.length - end).endsWith(elementText))
+          !newText.substring(start, newText.length - end).endsWith(elementText)) {
+        rightSpan = element;
         return true;
+      }
       endSpans.add(element);
       end += elementText.length;
       return false;
@@ -92,7 +98,7 @@ class CodeInputController extends TextEditingController {
     return TextSpan(style: style, children: [
       ...beforeSpans,
       TextSpan(
-          style: style,
+          style: leftSpan != null && leftSpan == rightSpan ? leftSpan.style : style,
           text: newText.substring(start, max(start, newText.length - end))),
       ...endSpans.reversed
     ]);
