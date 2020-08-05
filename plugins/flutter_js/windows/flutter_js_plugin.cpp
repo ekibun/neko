@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-07-18 16:22:37
  * @LastEditors: ekibun
- * @LastEditTime: 2020-08-02 16:47:49
+ * @LastEditTime: 2020-08-05 13:33:50
  */
 #include "include/flutter_js/flutter_js_plugin.h"
 
@@ -146,7 +146,7 @@ namespace
     }
     else if (method_call.method_name().compare("initEngine") == 0)
     {
-      int engineId = method_call.arguments()->IntValue();
+      int engineId = *((int *)method_call.arguments());
       std::cout << engineId << std::endl;
       // TODO use threadpool
       // qjs::Runtime* runtime = new qjs::Runtime();
@@ -157,9 +157,9 @@ namespace
     }
     else if (method_call.method_name().compare("evaluate") == 0)
     {
-      flutter::EncodableMap args = method_call.arguments()->MapValue();
-      std::string command = ValueOrNull(args, "command").StringValue();
-      int engineId = ValueOrNull(args, "engineId").IntValue();
+      flutter::EncodableMap args = *((flutter::EncodableMap *)method_call.arguments());
+      std::string command = std::get<std::string>(ValueOrNull(args, "command"));
+      int engineId = std::get<int>(ValueOrNull(args, "engineId"));
       // qjs::Runtime* runtime = jsEngineMap.at(engineId);
       auto presult = result.release();
       async2([presult, command]() {
@@ -227,7 +227,7 @@ namespace
     }
     else if (method_call.method_name().compare("close") == 0)
     {
-      flutter::EncodableMap args = method_call.arguments()->MapValue();
+      flutter::EncodableMap args = *((flutter::EncodableMap *)method_call.arguments());
       // TODO
       // int engineId = ValueOrNull(args, "engineId").IntValue();
       // if(jsEngineMap.count(engineId)) {
