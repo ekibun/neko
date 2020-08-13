@@ -1,0 +1,3 @@
+[submodule "plugins/flutter_qjs"]
+    path = plugins/flutter_qjs
+    url = https://github.com/ekibun/flutter_qjs.git
