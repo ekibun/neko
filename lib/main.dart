@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-06-24 20:26:20
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-18 23:31:20
+ * @LastEditTime: 2020-08-08 17:46:25
  */
 
 import 'package:neko/page/home.dart';
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'bangumew',
+      title: 'neko',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         appBarTheme: AppBarTheme(brightness: Brightness.dark, elevation: 0),
