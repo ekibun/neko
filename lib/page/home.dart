@@ -3,7 +3,7 @@
  * @Author: ekibun
  * @Date: 2020-06-26 12:38:36
  * @LastEditors: ekibun
- * @LastEditTime: 2020-07-18 15:10:13
+ * @LastEditTime: 2020-08-28 11:17:51
  */
 
 import 'package:neko/widget/searchaction.dart';
@@ -17,23 +17,19 @@ class HomePage extends StatelessWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
+          titleSpacing: 0,
           title: TabBar(
-            tabs: <Widget>[
-              Tab(text: '热门'),
-              Tab(text: '推荐'),
-              Tab(text: '关注')
-            ],
+            tabs: <Widget>[Tab(text: '热门'), Tab(text: '推荐'), Tab(text: '关注')],
             indicatorColor: Colors.white,
             isScrollable: true,
             indicatorSize: TabBarIndicatorSize.label,
           ),
           actions: [
-            SearchAction(onPressed: () => {
-              Navigator.pushNamed(context, 'search')
-            })
-          ],),
-        body: Text('home')
-      )
+            SearchAction(onPressed: () => {Navigator.pushNamed(context, 'search')})
+          ],
+        ),
+        body: Text('home'),
+      ),
     );
   }
 }

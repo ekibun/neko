@@ -1,3 +1,7 @@
 [submodule "plugins/flutter_qjs"]
     path = plugins/flutter_qjs
     url = https://github.com/ekibun/flutter_qjs.git
+
+[submodule "plugins/flutter_webview"]
+    path = plugins/flutter_webview
+    url = https://github.com/ekibun/flutter_webview.git

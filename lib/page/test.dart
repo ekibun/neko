@@ -3,12 +3,11 @@
  * @Author: ekibun
  * @Date: 2020-07-18 23:28:55
  * @LastEditors: ekibun
- * @LastEditTime: 2020-08-08 17:38:48
- */ 
-import 'package:dio/dio.dart';
+ * @LastEditTime: 2020-08-28 10:34:19
+ */
 import 'package:flutter/material.dart';
-import 'package:flutter_qjs/flutter_qjs.dart';
-import 'package:neko/widget/code/editor.dart';
+import 'package:neko/engine/jsengine.dart';
+import '../widget/highlight.dart';
 
 class TestPage extends StatefulWidget {
   @override
@@ -16,15 +15,15 @@ class TestPage extends StatefulWidget {
 }
 
 class _TestPageState extends State<TestPage> {
+  String resp;
 
-  String code, resp;
-  int engine;
+  CodeInputController _controller = CodeInputController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("JS 引擎功能测试"),
+        title: Text("JS engine test"),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -35,41 +34,22 @@ class _TestPageState extends State<TestPage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  FlatButton(child: Text("初始化引擎"), onPressed: () async {
-                    if ((engine?? 0) != 0) return;
-                    engine = await FlutterJs.initEngine();
-                    // dart 函数回调
-                    FlutterJs.methodHandler = (String method, List arg) async {
-                      switch (method) {
-                        case "delay":
-                          await Future.delayed(Duration(milliseconds: arg[0]));
-                          return;
-                        case "http":
-                          Response response = await Dio().get(arg[0]);
-                          return response.data;
-                        default:
-                      }
-                    };
-                  }),
-                  FlatButton(child: Text("运行"), onPressed: () async {
-                    if ((engine?? 0) == 0) {
-                      print("请先初始化引擎");
-                      return;
-                    }
-                    try {
-                      resp = await FlutterJs.evaluate(code ?? '', "<eval>");
-                    } catch(e) {
-                      resp = e.toString();
-                    }
-                    setState(() {
-                      code = code;
-                    });
-                  }),
-                  FlatButton(child: Text("释放引擎"), onPressed: () async {
-                    if ((engine?? 0) == 0) return;
-                    await FlutterJs.close();
-                    engine = 0;
-                  }),
+                  FlatButton(
+                      child: Text("run"),
+                      onPressed: () async {
+                        try {
+                          resp = (await JsEngine.evaluate(_controller.text ?? '', "<eval>"))
+                              .toString();
+                        } catch (e) {
+                          resp = e.toString();
+                        }
+                        setState(() {});
+                      }),
+                  FlatButton(
+                      child: Text("recreate"),
+                      onPressed: () async {
+                        JsEngine.recreate();
+                      }),
                 ],
               ),
             ),
@@ -77,14 +57,14 @@ class _TestPageState extends State<TestPage> {
               padding: const EdgeInsets.all(12),
               color: Colors.grey.withOpacity(0.1),
               constraints: BoxConstraints(minHeight: 200),
-              child: CodeEditor(
-                onChanged: (v) {
-                  code = v;
-                },
-              ),
+              child: TextField(
+                  autofocus: true,
+                  controller: _controller,
+                  decoration: null,
+                  maxLines: null),
             ),
             SizedBox(height: 16),
-            Text("运行结果："),
+            Text("result:"),
             SizedBox(height: 16),
             Container(
               width: double.infinity,

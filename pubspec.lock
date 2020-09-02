@@ -75,12 +75,19 @@ packages:
       path: "plugins/flutter_qjs"
       relative: true
     source: path
-    version: "0.0.1"
+    version: "0.0.6"
   flutter_test:
     dependency: "direct dev"
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_webview:
+    dependency: "direct main"
+    description:
+      path: "plugins/flutter_webview"
+      relative: true
+    source: path
+    version: "0.0.1"
   highlight:
     dependency: "direct main"
     description:

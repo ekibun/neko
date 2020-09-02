@@ -28,6 +28,8 @@ dependencies:
   flutter_highlight: 0.6.0
   flutter_qjs:
     path: plugins/flutter_qjs
+  flutter_webview:
+    path: plugins/flutter_webview
   dio: 3.0.10
 
 dev_dependencies:
@@ -46,7 +48,9 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
+  assets:
+    - js/module/
+    - js/init.js
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
