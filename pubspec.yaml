@@ -30,6 +30,8 @@ dependencies:
     path: plugins/flutter_qjs
   flutter_webview:
     path: plugins/flutter_webview
+  flutter_iconv:
+    path: plugins/flutter_iconv
   dio: 3.0.10
 
 dev_dependencies:

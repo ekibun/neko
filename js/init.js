@@ -6,34 +6,34 @@
  * @LastEditTime: 2020-08-29 21:50:56
  */
 (async () => {
-  const _dart = this.dart;
+  const _dart = this.channel;
 
   const CryptoJS = (await import("crypto")).default;
 
   class FormData {
-    constructor(data){
+    constructor(data) {
       const _data = data || {}
       this.__js_proto__ = "FormData";
-      this.__items__ = Object.keys(_data).map((k)=>({
+      this.__items__ = Object.keys(_data).map((k) => ({
         name: k,
         value: _data[k].filename ? _data[k].value : _data[k],
         filename: _data[k].filename
       }));
     }
 
-    append(name, value, filename){
+    append(name, value, filename) {
       this.__items__.append({ name, value, filename })
     }
 
-    delete(name){
-      const index  = this.__items__.findIndex((v) => v.name === name);
+    delete(name) {
+      const index = this.__items__.findIndex((v) => v.name === name);
       if (index < 0) return;
       this.__items__.splice(index, 1);
     }
 
     entries() {
       return function* () {
-        for(var item in __items__)
+        for (var item in __items__)
           yield [item.name, item.value, item.filename];
       };
     }
@@ -44,8 +44,8 @@
 
     getAll(name) {
       var ret = [];
-      for(var item in __items__)
-        if(item.name === name) ret.append(item.value);
+      for (var item in __items__)
+        if (item.name === name) ret.append(item.value);
       return value;
     }
 
@@ -55,30 +55,47 @@
 
     keys() {
       return function* () {
-        for(var item in __items__)
+        for (var item in __items__)
           yield item.name;
       };
     }
 
     set(name, value, filename) {
-      const index  = this.__items__.findIndex((v) => v.name === name);
+      const index = this.__items__.findIndex((v) => v.name === name);
       if (index < 0) this.append(name, value, filename);
       this.splice(index, 1, { name, value, filename });
     }
 
     values() {
       return function* () {
-        for(var item in __items__)
+        for (var item in __items__)
           yield item.value;
       };
     }
   };
 
-  const _TextEncoder = this.TextEncoder;
-  const _TextDecoder = this.TextDecoder;
+  class _TextEncoder {
+    constructor(encoding, options) {
+      this.encoding = "" + (encoding || "utf-8");
+      this.fatal = (options && options.fatal) || false;
+    }
+    encode(data) {
+      return _dart('encode', [data, this.encoding, this.fatal])
+    }
+  }
+
+  class _TextDecoder {
+    constructor(encoding, options) {
+      this.encoding =  "" + (encoding || "utf-8");
+      this.fatal = (options && options.fatal) || false;
+    }
+    decode(data) {
+      return _dart('decode', [data, this.encoding, this.fatal])
+    }
+  }
 
   class Response {
-    constructor(response){
+    constructor(response) {
       response = response || {};
       this.headers = response.headers;
       this.ok = response.ok;
@@ -92,7 +109,7 @@
     }
 
     clone() {
-      return new Response(this) 
+      return new Response(this)
     }
 
     async arrayBuffer() {
@@ -109,9 +126,9 @@
   }
 
   class Request {
-    constructor(input, init){
+    constructor(input, init) {
       const options = init || {};
-      const request = typeof input === "string" ? {url: input} : input;
+      const request = typeof input === "string" ? { url: input } : input;
       this.url = request.url;
       this.method = options.method || request.method || "GET";
       this.headers = options.headers || request.headers || {};
@@ -133,11 +150,11 @@
     Response,
     FormData,
     fetch: async (input, init) => {
-      const response = await _dart("fetch", new Request(input, init));
+      const response = await _dart("fetch", [new Request(input, init)]);
       return new Response(response);
     },
     webview: async (url, options) => {
-      return _dart("webview", url, options || {});
+      return _dart("webview", [url, options || {}]);
     },
     encodeURI: (uri, encoding) => {
       const encoder = new _TextEncoder(encoding || "utf-8");
@@ -149,11 +166,12 @@
     }
   }
 
-  Object.defineProperties(this, Object.assign({}, 
-    ...Object.keys(globalProperties).map((key)=>({
-      [key]:{
-        value: globalProperties[key], 
+  Object.defineProperties(this, Object.assign({},
+    ...Object.keys(globalProperties).map((key) => ({
+      [key]: {
+        value: globalProperties[key],
         writable: false
-      }}))));
-  delete this.dart;
+      }
+    }))));
+  delete this.channel;
 })();

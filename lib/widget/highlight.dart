@@ -5,12 +5,16 @@
  * @LastEditors: ekibun
  * @LastEditTime: 2020-08-02 12:39:26
  */
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_highlight/themes/a11y-light.dart';
 import 'package:highlight/highlight.dart';
+
+/// TODO ios/macos fontFamily
+TextStyle codeStyle = TextStyle(fontFamily: Platform.isWindows ? 'consolas': 'monospace');
 
 Map<String, TextStyle> _theme = a11yLightTheme;
 List<TextSpan> _convert(String code) {

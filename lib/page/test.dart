@@ -5,6 +5,8 @@
  * @LastEditors: ekibun
  * @LastEditTime: 2020-08-28 10:34:19
  */
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:neko/engine/jsengine.dart';
 import '../widget/highlight.dart';
@@ -61,6 +63,7 @@ class _TestPageState extends State<TestPage> {
                   autofocus: true,
                   controller: _controller,
                   decoration: null,
+                  style: codeStyle,
                   maxLines: null),
             ),
             SizedBox(height: 16),

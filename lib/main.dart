@@ -6,9 +6,11 @@
  * @LastEditTime: 2020-08-28 00:00:09
  */
 
+import 'dart:io';
+
 import 'package:neko/page/home.dart';
 import 'package:flutter/material.dart';
-import 'package:neko/page/test.dart';
+import 'package:neko/page/search.dart';
 
 import 'lifecycle.dart';
 
@@ -33,10 +35,11 @@ class MyApp extends StatelessWidget {
         accentColor: Color(0xffec818a),
         backgroundColor: Colors.grey[300],
         primaryColorBrightness: Brightness.dark,
+        fontFamily: Platform.isWindows ? "Microsoft Yahei UI" : null
       ),
       routes: {
         'home': (BuildContext context) => HomePage(),
-        'search': (BuildContext context) => TestPage(),
+        'search': (BuildContext context) => SearchPage(),
       },
       initialRoute: 'home',
     );
