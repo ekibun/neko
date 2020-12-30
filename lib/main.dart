@@ -8,7 +8,7 @@
 
 import 'dart:io';
 
-import 'package:neko/page/home.dart';
+import 'package:neko/page/home/index.dart';
 import 'package:flutter/material.dart';
 import 'package:neko/page/search.dart';
 

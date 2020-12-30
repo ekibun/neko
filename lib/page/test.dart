@@ -5,7 +5,6 @@
  * @LastEditors: ekibun
  * @LastEditTime: 2020-08-28 10:34:19
  */
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:neko/engine/jsengine.dart';
