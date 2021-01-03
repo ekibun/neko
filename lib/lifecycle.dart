@@ -25,8 +25,7 @@ void _updateSystemUI(BuildContext context) {
 class LifecycleWatcher extends StatefulWidget {
   final Widget child;
 
-  const LifecycleWatcher({Key key, this.child})
-      : super(key: key);
+  const LifecycleWatcher({Key key, this.child}) : super(key: key);
   @override
   _LifecycleWatcherState createState() => new _LifecycleWatcherState();
 }

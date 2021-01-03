@@ -14,7 +14,8 @@ import 'package:flutter_highlight/themes/a11y-light.dart';
 import 'package:highlight/highlight.dart';
 
 /// TODO ios/macos fontFamily
-TextStyle codeStyle = TextStyle(fontFamily: Platform.isWindows ? 'consolas': 'monospace');
+TextStyle codeStyle =
+    TextStyle(fontFamily: Platform.isWindows ? 'consolas' : 'monospace');
 
 Map<String, TextStyle> _theme = a11yLightTheme;
 List<TextSpan> _convert(String code) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neko/widget/ripple.dart';
 
 class TabItem extends StatelessWidget {
   final Function onTap;
@@ -22,31 +23,43 @@ class TabItem extends StatelessWidget {
     var childern = <Widget>[
       Icon(
         icon,
-        size: isLandscape ? 24 : 18,
+        size: isLandscape ? 20 : 18,
         color: isSelected ? Theme.of(context).primaryColor : null,
       ),
-      SizedBox.fromSize(
-        size: isLandscape ? Size(4, 0) : Size(0, 4),
-      ),
+      SizedBox(width: 12, height: 4),
       Text(
         title,
         style: TextStyle(
-            fontSize: isLandscape ? 18 : 12,
-            color: isSelected ? Theme.of(context).primaryColor : null),
+          fontSize: isLandscape ? 15 : 12,
+          color: isSelected ? Theme.of(context).primaryColor : null,
+        ),
+        overflow: TextOverflow.ellipsis,
       ),
     ];
-    return InkWell(
-        onTap: onTap,
-        child: isLandscape
-            ? Padding(
-                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                child: Row(
-                  children: childern,
-                ),
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+    final ret = Ripple(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      borderless: !isLandscape,
+      backgroundColor: isSelected && isLandscape
+          ? Theme.of(context).primaryColor.withAlpha(40)
+          : null,
+      child: isLandscape
+          ? Padding(
+              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              child: Row(
                 children: childern,
-              ));
+              ),
+            )
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: childern,
+            ),
+    );
+    return isLandscape
+        ? Padding(
+            padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+            child: ret,
+          )
+        : ret;
   }
 }

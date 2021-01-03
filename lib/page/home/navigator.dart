@@ -26,8 +26,8 @@ var routes = <_Route>[
     (context) => DownloadPage(),
   ),
   _Route(
-    Icons.source,
-    "数据源",
+    Icons.apps,
+    "扩展",
     "provider",
     (context) => ProviderPage(),
   ),

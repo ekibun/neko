@@ -16,7 +16,9 @@ Future<dynamic> webview(String url, Map options) async {
     print("$method($args)");
     if (method == "onNavigationCompleted") {
       await Future.delayed(Duration(seconds: 10));
-      if (!c.isCompleted) c.completeError("Webview Call timeout 10 seconds after page completed.");
+      if (!c.isCompleted)
+        c.completeError(
+            "Webview Call timeout 10 seconds after page completed.");
     }
     var callback = options[method];
     if (callback != null) if ((await callback([args])) == true) {

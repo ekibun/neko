@@ -28,5 +28,6 @@ class ScreenAdapt extends StatelessWidget {
 }
 
 class MediaQueryTriggers {
-  static final MediaQueryTrigger isTablet = (mediaquery) => mediaquery.size.width > 500;
+  static final MediaQueryTrigger isTablet =
+      (mediaquery) => mediaquery.size.width > 500;
 }

@@ -13,20 +13,6 @@ import 'navigator.dart';
 class HomePage extends StatefulWidget {
   final homeContainerKey = GlobalKey<NavigatorState>();
 
-  Widget _buildHomeContainer(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      navigatorKey: homeContainerKey,
-      initialRoute: routes.first.route,
-      theme: Theme.of(context),
-      routes: Map.fromIterable(
-        routes,
-        key: (r) => r.route,
-        value: (r) => r.builder,
-      ),
-    );
-  }
-
   @override
   State<StatefulWidget> createState() {
     return HomePageState();
@@ -35,12 +21,12 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   String currentRoute = routes.first.route;
-  @override
+
   Widget build(BuildContext context) {
     final _currentRoute = routes.firstWhere((r) => r.route == currentRoute);
     final homeContainer = AnimatedSwitcher(
       duration: Duration(milliseconds: 300),
-      child: Container(
+      child: Material(
         key: ValueKey(_currentRoute.route),
         child: _currentRoute.builder(context),
       ),
@@ -64,12 +50,21 @@ class HomePageState extends State<HomePage> {
           return Row(
             children: [
               Container(
-                width: 250,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                ),
+                width: 200,
                 child: Material(
-                  child: Column(children: tabs.toList()),
+                  color: Theme.of(context).cardColor,
+                  child: ListView(
+                    children: [
+                      Container(
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).canvasColor.withAlpha(100),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      ...tabs,
+                    ],
+                  ),
                 ),
               ),
               Expanded(
@@ -84,11 +79,18 @@ class HomePageState extends State<HomePage> {
                 child: homeContainer,
               ),
               Container(
-                height: 50,
+                height: 56,
                 decoration: BoxDecoration(
                   color: Theme.of(context).cardColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 15,
+                    )
+                  ],
                 ),
                 child: Material(
+                  type: MaterialType.transparency,
                   child: Row(
                     children: tabs.map((e) => Expanded(child: e)).toList(),
                   ),

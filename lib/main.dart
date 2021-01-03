@@ -8,41 +8,45 @@
 
 import 'dart:io';
 
+import 'package:neko/model/collection.dart';
 import 'package:neko/page/home/index.dart';
 import 'package:flutter/material.dart';
-import 'package:neko/page/search.dart';
+import 'package:neko/page/search/index.dart';
+import 'package:neko/theme.dart';
+import 'package:provider/provider.dart';
 
 import 'lifecycle.dart';
 
 void main() {
-  runApp(LifecycleWatcher(
-    child: const MyApp()
-  ));
+  runApp(LifecycleWatcher(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-
-  const MyApp({ Key key }) : super(key: key);
+  const MyApp({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'neko',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        appBarTheme: AppBarTheme(brightness: Brightness.dark, elevation: 0),
-        primaryColor: Color(0xfff09199),
-        accentColor: Color(0xffec818a),
-        backgroundColor: Colors.grey[300],
-        primaryColorBrightness: Brightness.dark,
-        fontFamily: Platform.isWindows ? "Microsoft Yahei UI" : null
+    return Provider(
+      create: (_) => CollectionModel(),
+      child: MaterialApp(
+        title: 'neko',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+            appBarTheme: AppBarTheme(brightness: Brightness.dark, elevation: 0),
+            primaryColor: AppTheme.primaryColor,
+            accentColor: AppTheme.accentColor,
+            canvasColor: AppTheme.backgroundColor,
+            hintColor: AppTheme.primaryColor,
+            backgroundColor: Colors.transparent,
+            splashColor: AppTheme.accentColor.withAlpha(50),
+            primaryColorBrightness: Brightness.dark,
+            fontFamily: Platform.isWindows ? "Microsoft Yahei UI" : null),
+        routes: {
+          'home': (BuildContext context) => HomePage(),
+          'search': (BuildContext context) => SearchPage(),
+        },
+        initialRoute: 'home',
       ),
-      routes: {
-        'home': (BuildContext context) => HomePage(),
-        'search': (BuildContext context) => SearchPage(),
-      },
-      initialRoute: 'home',
     );
   }
-
 }

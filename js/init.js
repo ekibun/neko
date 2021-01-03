@@ -8,8 +8,6 @@
 (async () => {
   const _dart = this.channel;
 
-  const CryptoJS = (await import("crypto")).default;
-
   class FormData {
     constructor(data) {
       const _data = data || {}
@@ -86,7 +84,7 @@
 
   class _TextDecoder {
     constructor(encoding, options) {
-      this.encoding =  "" + (encoding || "utf-8");
+      this.encoding = "" + (encoding || "utf-8");
       this.fatal = (options && options.fatal) || false;
     }
     decode(data) {
@@ -142,13 +140,30 @@
     .map(v => "%" + v.toString(16))
     .join("").toUpperCase();
 
+  const print = (...args) => {
+    _dart("log", args)
+  };
+
   const globalProperties = {
-    CryptoJS,
     TextEncoder: _TextEncoder,
     TextDecoder: _TextDecoder,
     Request,
     Response,
     FormData,
+    console: {
+      log: (...args) => {
+        _dart("console", ["log", args]);
+      },
+      info: (...args) => {
+        _dart("console", ["info", args]);
+      },
+      debug: (...args) => {
+        _dart("console", ["debug", args]);
+      },
+      error: (...args) => {
+        _dart("console", ["error", args]);
+      }
+    },
     fetch: async (input, init) => {
       const response = await _dart("fetch", [new Request(input, init)]);
       return new Response(response);

@@ -18,7 +18,8 @@ class Http {
               validateStatus: (status) => true,
             ),
           );
-          _dio.interceptors.add(LogInterceptor(requestBody: true));
+          _dio.interceptors
+              .add(LogInterceptor(requestHeader: false, responseHeader: false));
         }
         return _dio;
       })();
@@ -57,11 +58,10 @@ class Http {
       req["url"],
       data: reqBody,
       options: Options(
-        method: req["method"],
-        headers: Map.from(req["headers"]),
-        responseType: ResponseType.bytes,
-        followRedirects: req["redirect"] == "follow"
-      ),
+          method: req["method"],
+          headers: Map.from(req["headers"]),
+          responseType: ResponseType.bytes,
+          followRedirects: req["redirect"] == "follow"),
     ));
     return {
       "url": rsp.isRedirect ? rsp.realUri.toString() : req["url"],

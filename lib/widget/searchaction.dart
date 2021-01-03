@@ -25,7 +25,8 @@ class SearchAction extends StatelessWidget {
           child: Ink(
             width: 200,
             decoration: BoxDecoration(
-                color: Theme.of(context).accentColor, borderRadius: BorderRadius.circular(10000)),
+                color: Theme.of(context).accentColor,
+                borderRadius: BorderRadius.circular(10000)),
             child: InkWell(
                 onTap: onPressed,
                 borderRadius: BorderRadius.circular(10000),
