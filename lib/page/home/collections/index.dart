@@ -14,14 +14,11 @@ class CollectionPage extends StatefulWidget {
 class _CollectionPageState extends State<CollectionPage> {
   @override
   Widget build(BuildContext context) {
-    SubjectDatabase subjectDatabase =
-        Provider.of<Database>(context, listen: false).subject;
-
     return Stack(
       children: [
         SafeArea(
           child: StreamBuilder(
-            stream: subjectDatabase.watchCollections(),
+            stream: Database.subject.watchCollections(),
             builder: (context, snapshot) {
               List<SubjectCollection> subjects = snapshot.data ?? [];
               return SubjectList(

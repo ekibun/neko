@@ -56,6 +56,14 @@ class SubjectDatabase extends _$SubjectDatabase {
         ..where(
             (tbl) => tbl.id.equals(subject.id) & tbl.site.equals(subject.site)))
       .getSingle();
-  
-  Future removeCollection(Insertable<Collection> collection) => delete(collections).delete(collection);
+
+  Future<List<Collection>> getCollections(Iterable<Subject> subjects) =>
+      (select(collections)
+            ..where((tbl) =>
+                tbl.id.isIn(subjects.map((e) => e.id).toSet()) &
+                tbl.site.isIn(subjects.map((e) => e.site).toSet())))
+          .get();
+
+  Future removeCollection(Insertable<Collection> collection) =>
+      delete(collections).delete(collection);
 }

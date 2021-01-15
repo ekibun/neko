@@ -27,13 +27,15 @@ export const search = async (key, page) => {
     const id = Number(itemDom.attr('id').split('_').pop());
     if (Number.isNaN(id)) return;
     const imgDom = itemDom.find('img')?.first();
+    const typeInt = Number(itemDom.find('.ico_subject_type')?.attr("class")?.split('_')?.pop());
     return {
       id: id,
       name: itemDom.find('h3 a').first()?.text(),
       image: {
         url: imgDom && parseImageUrl($(imgDom)).replace(/\/[lcmgs]\//, '/m/'),
       },
-      summary: itemDom.find(".info").first()?.text()?.replace(/^[\n ]/, '')
+      summary: itemDom.find(".info").first()?.text()?.replace(/^[\n ]/, ''),
+      type: typeInt == 1 ? "book" : typeInt == 2 || typeInt == 6 ? "video" : typeInt == 3 ? "music" : undefined,
     };
   }).filter(v => v);
 }

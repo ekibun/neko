@@ -13,6 +13,4 @@ class Subjects extends Table {
   TextColumn get image => text().nullable()();
 
   TextColumn get summary => text().nullable()();
-  IntColumn get score => integer().nullable()();
-  TextColumn get tags => text().nullable()();
 }

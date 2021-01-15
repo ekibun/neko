@@ -49,24 +49,26 @@ class _SearchPageState extends State<SearchPage> {
       if (value["search"] is IsolateJSFunction) {
         final searchData = await value["search"].invoke([key, page]);
         if (!(searchData is List)) throw Exception("return data error");
-        final SubjectDatabase subjectDatabase =
-            Provider.of<Database>(context, listen: false).subject;
-        final searchResultData = <SubjectCollection>[];
-        for (final item in searchData) {
-          final subject = Subject(
-            id: item["id"]?.toString() ?? "",
-            site: item["site"] ?? site,
-            subjectType: item["type"] ?? "",
-            name: item["name"],
-            image: jsonEncode(item["image"]),
-            summary: item["summary"],
-            score: item["score"],
-            tags: jsonEncode(item["tags"]),
+        final List<SubjectCollection> searchResultData =
+            List<SubjectCollection>.from(
+          searchData.map((item) => SubjectCollection()
+            ..subject = Subject(
+              id: item["id"]?.toString() ?? "",
+              site: item["site"] ?? site,
+              subjectType: item["type"] ?? "",
+              name: item["name"],
+              image: jsonEncode(item["image"]),
+              summary: item["summary"],
+            )),
+        );
+        final collections = await Database.subject
+            .getCollections(searchResultData.map((e) => e.subject));
+        searchResultData.forEach((e) {
+          e.collection = collections.firstWhere(
+            (c) => e.subject.site == c.site && e.subject.id == c.id,
+            orElse: () => null,
           );
-          searchResultData.add(SubjectCollection()
-            ..subject = subject
-            ..collection = await subjectDatabase.getCollection(subject));
-        }
+        });
         searchJob.complete(searchResultData);
       } else {
         searchJob.completeError("datasource $site.search is not a function");
@@ -85,8 +87,6 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    SubjectDatabase subjectDatabase =
-        Provider.of<Database>(context, listen: false).subject;
     return Material(
       child: Stack(children: [
         SafeArea(
@@ -95,17 +95,17 @@ class _SearchPageState extends State<SearchPage> {
             padding: EdgeInsets.fromLTRB(12, 60, 12, 12),
             onTapItem: (data) async {
               final nowTime = DateTime.now();
-              if(data.collection != null) {
-                await subjectDatabase.removeCollection(data.collection);
+              if (data.collection != null) {
+                await Database.subject.removeCollection(data.collection);
                 data.collection = null;
-              } else{
+              } else {
                 data.collection = Collection(
                   site: data.subject.site,
                   id: data.subject.id,
                   createTime: nowTime,
                   updateTime: nowTime,
                 );
-                await subjectDatabase.insertSubjectCollection(data);
+                await Database.subject.insertSubjectCollection(data);
               }
               setState(() {});
             },

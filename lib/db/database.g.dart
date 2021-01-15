@@ -14,22 +14,17 @@ class Subject extends DataClass implements Insertable<Subject> {
   final String name;
   final String image;
   final String summary;
-  final int score;
-  final String tags;
   Subject(
       {@required this.site,
       @required this.id,
       @required this.subjectType,
       @required this.name,
       this.image,
-      this.summary,
-      this.score,
-      this.tags});
+      this.summary});
   factory Subject.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Subject(
       site: stringType.mapFromDatabaseResponse(data['${effectivePrefix}site']),
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
@@ -40,8 +35,6 @@ class Subject extends DataClass implements Insertable<Subject> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}image']),
       summary:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}summary']),
-      score: intType.mapFromDatabaseResponse(data['${effectivePrefix}score']),
-      tags: stringType.mapFromDatabaseResponse(data['${effectivePrefix}tags']),
     );
   }
   @override
@@ -65,12 +58,6 @@ class Subject extends DataClass implements Insertable<Subject> {
     if (!nullToAbsent || summary != null) {
       map['summary'] = Variable<String>(summary);
     }
-    if (!nullToAbsent || score != null) {
-      map['score'] = Variable<int>(score);
-    }
-    if (!nullToAbsent || tags != null) {
-      map['tags'] = Variable<String>(tags);
-    }
     return map;
   }
 
@@ -87,9 +74,6 @@ class Subject extends DataClass implements Insertable<Subject> {
       summary: summary == null && nullToAbsent
           ? const Value.absent()
           : Value(summary),
-      score:
-          score == null && nullToAbsent ? const Value.absent() : Value(score),
-      tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
     );
   }
 
@@ -103,8 +87,6 @@ class Subject extends DataClass implements Insertable<Subject> {
       name: serializer.fromJson<String>(json['name']),
       image: serializer.fromJson<String>(json['image']),
       summary: serializer.fromJson<String>(json['summary']),
-      score: serializer.fromJson<int>(json['score']),
-      tags: serializer.fromJson<String>(json['tags']),
     );
   }
   @override
@@ -117,8 +99,6 @@ class Subject extends DataClass implements Insertable<Subject> {
       'name': serializer.toJson<String>(name),
       'image': serializer.toJson<String>(image),
       'summary': serializer.toJson<String>(summary),
-      'score': serializer.toJson<int>(score),
-      'tags': serializer.toJson<String>(tags),
     };
   }
 
@@ -128,9 +108,7 @@ class Subject extends DataClass implements Insertable<Subject> {
           String subjectType,
           String name,
           String image,
-          String summary,
-          int score,
-          String tags}) =>
+          String summary}) =>
       Subject(
         site: site ?? this.site,
         id: id ?? this.id,
@@ -138,8 +116,6 @@ class Subject extends DataClass implements Insertable<Subject> {
         name: name ?? this.name,
         image: image ?? this.image,
         summary: summary ?? this.summary,
-        score: score ?? this.score,
-        tags: tags ?? this.tags,
       );
   @override
   String toString() {
@@ -149,9 +125,7 @@ class Subject extends DataClass implements Insertable<Subject> {
           ..write('subjectType: $subjectType, ')
           ..write('name: $name, ')
           ..write('image: $image, ')
-          ..write('summary: $summary, ')
-          ..write('score: $score, ')
-          ..write('tags: $tags')
+          ..write('summary: $summary')
           ..write(')'))
         .toString();
   }
@@ -161,14 +135,8 @@ class Subject extends DataClass implements Insertable<Subject> {
       site.hashCode,
       $mrjc(
           id.hashCode,
-          $mrjc(
-              subjectType.hashCode,
-              $mrjc(
-                  name.hashCode,
-                  $mrjc(
-                      image.hashCode,
-                      $mrjc(summary.hashCode,
-                          $mrjc(score.hashCode, tags.hashCode))))))));
+          $mrjc(subjectType.hashCode,
+              $mrjc(name.hashCode, $mrjc(image.hashCode, summary.hashCode))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -178,9 +146,7 @@ class Subject extends DataClass implements Insertable<Subject> {
           other.subjectType == this.subjectType &&
           other.name == this.name &&
           other.image == this.image &&
-          other.summary == this.summary &&
-          other.score == this.score &&
-          other.tags == this.tags);
+          other.summary == this.summary);
 }
 
 class SubjectsCompanion extends UpdateCompanion<Subject> {
@@ -190,8 +156,6 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
   final Value<String> name;
   final Value<String> image;
   final Value<String> summary;
-  final Value<int> score;
-  final Value<String> tags;
   const SubjectsCompanion({
     this.site = const Value.absent(),
     this.id = const Value.absent(),
@@ -199,8 +163,6 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
     this.name = const Value.absent(),
     this.image = const Value.absent(),
     this.summary = const Value.absent(),
-    this.score = const Value.absent(),
-    this.tags = const Value.absent(),
   });
   SubjectsCompanion.insert({
     @required String site,
@@ -209,8 +171,6 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
     @required String name,
     this.image = const Value.absent(),
     this.summary = const Value.absent(),
-    this.score = const Value.absent(),
-    this.tags = const Value.absent(),
   })  : site = Value(site),
         id = Value(id),
         subjectType = Value(subjectType),
@@ -222,8 +182,6 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
     Expression<String> name,
     Expression<String> image,
     Expression<String> summary,
-    Expression<int> score,
-    Expression<String> tags,
   }) {
     return RawValuesInsertable({
       if (site != null) 'site': site,
@@ -232,8 +190,6 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
       if (name != null) 'name': name,
       if (image != null) 'image': image,
       if (summary != null) 'summary': summary,
-      if (score != null) 'score': score,
-      if (tags != null) 'tags': tags,
     });
   }
 
@@ -243,9 +199,7 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
       Value<String> subjectType,
       Value<String> name,
       Value<String> image,
-      Value<String> summary,
-      Value<int> score,
-      Value<String> tags}) {
+      Value<String> summary}) {
     return SubjectsCompanion(
       site: site ?? this.site,
       id: id ?? this.id,
@@ -253,8 +207,6 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
       name: name ?? this.name,
       image: image ?? this.image,
       summary: summary ?? this.summary,
-      score: score ?? this.score,
-      tags: tags ?? this.tags,
     );
   }
 
@@ -279,12 +231,6 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
     if (summary.present) {
       map['summary'] = Variable<String>(summary.value);
     }
-    if (score.present) {
-      map['score'] = Variable<int>(score.value);
-    }
-    if (tags.present) {
-      map['tags'] = Variable<String>(tags.value);
-    }
     return map;
   }
 
@@ -296,9 +242,7 @@ class SubjectsCompanion extends UpdateCompanion<Subject> {
           ..write('subjectType: $subjectType, ')
           ..write('name: $name, ')
           ..write('image: $image, ')
-          ..write('summary: $summary, ')
-          ..write('score: $score, ')
-          ..write('tags: $tags')
+          ..write('summary: $summary')
           ..write(')'))
         .toString();
   }
@@ -382,33 +326,9 @@ class $SubjectsTable extends Subjects with TableInfo<$SubjectsTable, Subject> {
     );
   }
 
-  final VerificationMeta _scoreMeta = const VerificationMeta('score');
-  GeneratedIntColumn _score;
-  @override
-  GeneratedIntColumn get score => _score ??= _constructScore();
-  GeneratedIntColumn _constructScore() {
-    return GeneratedIntColumn(
-      'score',
-      $tableName,
-      true,
-    );
-  }
-
-  final VerificationMeta _tagsMeta = const VerificationMeta('tags');
-  GeneratedTextColumn _tags;
-  @override
-  GeneratedTextColumn get tags => _tags ??= _constructTags();
-  GeneratedTextColumn _constructTags() {
-    return GeneratedTextColumn(
-      'tags',
-      $tableName,
-      true,
-    );
-  }
-
   @override
   List<GeneratedColumn> get $columns =>
-      [site, id, subjectType, name, image, summary, score, tags];
+      [site, id, subjectType, name, image, summary];
   @override
   $SubjectsTable get asDslTable => this;
   @override
@@ -453,14 +373,6 @@ class $SubjectsTable extends Subjects with TableInfo<$SubjectsTable, Subject> {
       context.handle(_summaryMeta,
           summary.isAcceptableOrUnknown(data['summary'], _summaryMeta));
     }
-    if (data.containsKey('score')) {
-      context.handle(
-          _scoreMeta, score.isAcceptableOrUnknown(data['score'], _scoreMeta));
-    }
-    if (data.containsKey('tags')) {
-      context.handle(
-          _tagsMeta, tags.isAcceptableOrUnknown(data['tags'], _tagsMeta));
-    }
     return context;
   }
 
@@ -484,6 +396,7 @@ class Collection extends DataClass implements Insertable<Collection> {
   final String lastViewEp;
   final int score;
   final String comment;
+  final String tags;
   final DateTime createTime;
   final DateTime updateTime;
   Collection(
@@ -492,6 +405,7 @@ class Collection extends DataClass implements Insertable<Collection> {
       this.lastViewEp,
       this.score,
       this.comment,
+      this.tags,
       @required this.createTime,
       @required this.updateTime});
   factory Collection.fromData(Map<String, dynamic> data, GeneratedDatabase db,
@@ -508,6 +422,7 @@ class Collection extends DataClass implements Insertable<Collection> {
       score: intType.mapFromDatabaseResponse(data['${effectivePrefix}score']),
       comment:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}comment']),
+      tags: stringType.mapFromDatabaseResponse(data['${effectivePrefix}tags']),
       createTime: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}create_time']),
       updateTime: dateTimeType
@@ -532,6 +447,9 @@ class Collection extends DataClass implements Insertable<Collection> {
     if (!nullToAbsent || comment != null) {
       map['comment'] = Variable<String>(comment);
     }
+    if (!nullToAbsent || tags != null) {
+      map['tags'] = Variable<String>(tags);
+    }
     if (!nullToAbsent || createTime != null) {
       map['create_time'] = Variable<DateTime>(createTime);
     }
@@ -553,6 +471,7 @@ class Collection extends DataClass implements Insertable<Collection> {
       comment: comment == null && nullToAbsent
           ? const Value.absent()
           : Value(comment),
+      tags: tags == null && nullToAbsent ? const Value.absent() : Value(tags),
       createTime: createTime == null && nullToAbsent
           ? const Value.absent()
           : Value(createTime),
@@ -571,6 +490,7 @@ class Collection extends DataClass implements Insertable<Collection> {
       lastViewEp: serializer.fromJson<String>(json['lastViewEp']),
       score: serializer.fromJson<int>(json['score']),
       comment: serializer.fromJson<String>(json['comment']),
+      tags: serializer.fromJson<String>(json['tags']),
       createTime: serializer.fromJson<DateTime>(json['createTime']),
       updateTime: serializer.fromJson<DateTime>(json['updateTime']),
     );
@@ -584,6 +504,7 @@ class Collection extends DataClass implements Insertable<Collection> {
       'lastViewEp': serializer.toJson<String>(lastViewEp),
       'score': serializer.toJson<int>(score),
       'comment': serializer.toJson<String>(comment),
+      'tags': serializer.toJson<String>(tags),
       'createTime': serializer.toJson<DateTime>(createTime),
       'updateTime': serializer.toJson<DateTime>(updateTime),
     };
@@ -595,6 +516,7 @@ class Collection extends DataClass implements Insertable<Collection> {
           String lastViewEp,
           int score,
           String comment,
+          String tags,
           DateTime createTime,
           DateTime updateTime}) =>
       Collection(
@@ -603,6 +525,7 @@ class Collection extends DataClass implements Insertable<Collection> {
         lastViewEp: lastViewEp ?? this.lastViewEp,
         score: score ?? this.score,
         comment: comment ?? this.comment,
+        tags: tags ?? this.tags,
         createTime: createTime ?? this.createTime,
         updateTime: updateTime ?? this.updateTime,
       );
@@ -614,6 +537,7 @@ class Collection extends DataClass implements Insertable<Collection> {
           ..write('lastViewEp: $lastViewEp, ')
           ..write('score: $score, ')
           ..write('comment: $comment, ')
+          ..write('tags: $tags, ')
           ..write('createTime: $createTime, ')
           ..write('updateTime: $updateTime')
           ..write(')'))
@@ -629,8 +553,12 @@ class Collection extends DataClass implements Insertable<Collection> {
               lastViewEp.hashCode,
               $mrjc(
                   score.hashCode,
-                  $mrjc(comment.hashCode,
-                      $mrjc(createTime.hashCode, updateTime.hashCode)))))));
+                  $mrjc(
+                      comment.hashCode,
+                      $mrjc(
+                          tags.hashCode,
+                          $mrjc(
+                              createTime.hashCode, updateTime.hashCode))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -640,6 +568,7 @@ class Collection extends DataClass implements Insertable<Collection> {
           other.lastViewEp == this.lastViewEp &&
           other.score == this.score &&
           other.comment == this.comment &&
+          other.tags == this.tags &&
           other.createTime == this.createTime &&
           other.updateTime == this.updateTime);
 }
@@ -650,6 +579,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
   final Value<String> lastViewEp;
   final Value<int> score;
   final Value<String> comment;
+  final Value<String> tags;
   final Value<DateTime> createTime;
   final Value<DateTime> updateTime;
   const CollectionsCompanion({
@@ -658,6 +588,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     this.lastViewEp = const Value.absent(),
     this.score = const Value.absent(),
     this.comment = const Value.absent(),
+    this.tags = const Value.absent(),
     this.createTime = const Value.absent(),
     this.updateTime = const Value.absent(),
   });
@@ -667,6 +598,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     this.lastViewEp = const Value.absent(),
     this.score = const Value.absent(),
     this.comment = const Value.absent(),
+    this.tags = const Value.absent(),
     @required DateTime createTime,
     @required DateTime updateTime,
   })  : site = Value(site),
@@ -679,6 +611,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     Expression<String> lastViewEp,
     Expression<int> score,
     Expression<String> comment,
+    Expression<String> tags,
     Expression<DateTime> createTime,
     Expression<DateTime> updateTime,
   }) {
@@ -688,6 +621,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
       if (lastViewEp != null) 'last_view_ep': lastViewEp,
       if (score != null) 'score': score,
       if (comment != null) 'comment': comment,
+      if (tags != null) 'tags': tags,
       if (createTime != null) 'create_time': createTime,
       if (updateTime != null) 'update_time': updateTime,
     });
@@ -699,6 +633,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
       Value<String> lastViewEp,
       Value<int> score,
       Value<String> comment,
+      Value<String> tags,
       Value<DateTime> createTime,
       Value<DateTime> updateTime}) {
     return CollectionsCompanion(
@@ -707,6 +642,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
       lastViewEp: lastViewEp ?? this.lastViewEp,
       score: score ?? this.score,
       comment: comment ?? this.comment,
+      tags: tags ?? this.tags,
       createTime: createTime ?? this.createTime,
       updateTime: updateTime ?? this.updateTime,
     );
@@ -730,6 +666,9 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     if (comment.present) {
       map['comment'] = Variable<String>(comment.value);
     }
+    if (tags.present) {
+      map['tags'] = Variable<String>(tags.value);
+    }
     if (createTime.present) {
       map['create_time'] = Variable<DateTime>(createTime.value);
     }
@@ -747,6 +686,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
           ..write('lastViewEp: $lastViewEp, ')
           ..write('score: $score, ')
           ..write('comment: $comment, ')
+          ..write('tags: $tags, ')
           ..write('createTime: $createTime, ')
           ..write('updateTime: $updateTime')
           ..write(')'))
@@ -819,6 +759,18 @@ class $CollectionsTable extends Collections
     );
   }
 
+  final VerificationMeta _tagsMeta = const VerificationMeta('tags');
+  GeneratedTextColumn _tags;
+  @override
+  GeneratedTextColumn get tags => _tags ??= _constructTags();
+  GeneratedTextColumn _constructTags() {
+    return GeneratedTextColumn(
+      'tags',
+      $tableName,
+      true,
+    );
+  }
+
   final VerificationMeta _createTimeMeta = const VerificationMeta('createTime');
   GeneratedDateTimeColumn _createTime;
   @override
@@ -847,7 +799,7 @@ class $CollectionsTable extends Collections
 
   @override
   List<GeneratedColumn> get $columns =>
-      [site, id, lastViewEp, score, comment, createTime, updateTime];
+      [site, id, lastViewEp, score, comment, tags, createTime, updateTime];
   @override
   $CollectionsTable get asDslTable => this;
   @override
@@ -883,6 +835,10 @@ class $CollectionsTable extends Collections
     if (data.containsKey('comment')) {
       context.handle(_commentMeta,
           comment.isAcceptableOrUnknown(data['comment'], _commentMeta));
+    }
+    if (data.containsKey('tags')) {
+      context.handle(
+          _tagsMeta, tags.isAcceptableOrUnknown(data['tags'], _tagsMeta));
     }
     if (data.containsKey('create_time')) {
       context.handle(

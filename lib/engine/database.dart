@@ -33,5 +33,5 @@ DatabaseConnection _backgroundConnection() {
 class Database {
   static Future<DatabaseConnection> _connection =
       MoorIsolate.spawn(_backgroundConnection).then((value) => value.connect());
-  final subject = SubjectDatabase(DatabaseConnection.delayed(_connection));
+  static final subject = SubjectDatabase(DatabaseConnection.delayed(_connection));
 }

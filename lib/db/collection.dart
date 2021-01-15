@@ -16,6 +16,7 @@ class Collections extends Table {
 
   IntColumn get score => integer().nullable()();
   TextColumn get comment => text().nullable()();
+  TextColumn get tags => text().nullable()();
 
   DateTimeColumn get createTime => dateTime()();
   DateTimeColumn get updateTime => dateTime()();

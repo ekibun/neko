@@ -47,7 +47,8 @@ class SubjectList extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        data?.subject?.name ?? "",
+                        (data?.subject?.subjectType ?? "") +
+                            (data?.subject?.name ?? ""),
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.subtitle1,
                       ),
