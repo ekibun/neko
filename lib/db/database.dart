@@ -51,4 +51,11 @@ class SubjectDatabase extends _$SubjectDatabase {
     await insertSubject(subjectCollection.subject);
     await insertCollection(subjectCollection.collection);
   }
+
+  Future<Collection> getCollection(Subject subject) => (select(collections)
+        ..where(
+            (tbl) => tbl.id.equals(subject.id) & tbl.site.equals(subject.site)))
+      .getSingle();
+  
+  Future removeCollection(Insertable<Collection> collection) => delete(collections).delete(collection);
 }

@@ -47,18 +47,13 @@ class _SearchPageState extends State<SearchPage> {
     DataSource.getProvider(site).then((value) async {
       if (searchJob.isCompleted) return;
       if (value["search"] is IsolateJSFunction) {
-        searchJob.complete(await value["search"].invoke([key, page]));
-      } else {
-        searchJob.completeError("datasource $site.search is not a function");
-      }
-      jobs.remove(searchJob);
-    });
-
-    searchJob.future.then((value) {
-      if (!(value is List)) throw Exception("return data error");
-      (value as List).forEach((item) {
-        searchResult.add(SubjectCollection()
-          ..subject = Subject(
+        final searchData = await value["search"].invoke([key, page]);
+        if (!(searchData is List)) throw Exception("return data error");
+        final SubjectDatabase subjectDatabase =
+            Provider.of<Database>(context, listen: false).subject;
+        final searchResultData = <SubjectCollection>[];
+        for (final item in searchData) {
+          final subject = Subject(
             id: item["id"]?.toString() ?? "",
             site: item["site"] ?? site,
             subjectType: item["type"] ?? "",
@@ -67,10 +62,22 @@ class _SearchPageState extends State<SearchPage> {
             summary: item["summary"],
             score: item["score"],
             tags: jsonEncode(item["tags"]),
-          ));
-      });
+          );
+          searchResultData.add(SubjectCollection()
+            ..subject = subject
+            ..collection = await subjectDatabase.getCollection(subject));
+        }
+        searchJob.complete(searchResultData);
+      } else {
+        searchJob.completeError("datasource $site.search is not a function");
+      }
+      jobs.remove(searchJob);
+    });
+
+    searchJob.future.then((value) async {
+      searchResult.addAll(value);
       setState(() {});
-    }, onError: (e) {
+    }).catchError((e) {
       print("search error:\n$e");
     });
     jobs.add(searchJob);
@@ -86,16 +93,21 @@ class _SearchPageState extends State<SearchPage> {
           child: SubjectList(
             items: searchResult,
             padding: EdgeInsets.fromLTRB(12, 60, 12, 12),
-            onTapItem: (data) {
+            onTapItem: (data) async {
               final nowTime = DateTime.now();
-              subjectDatabase.insertSubjectCollection(data
-                ..collection = Collection(
+              if(data.collection != null) {
+                await subjectDatabase.removeCollection(data.collection);
+                data.collection = null;
+              } else{
+                data.collection = Collection(
                   site: data.subject.site,
                   id: data.subject.id,
                   createTime: nowTime,
                   updateTime: nowTime,
-                ));
-              // collectionBox.put(data['id'], data);
+                );
+                await subjectDatabase.insertSubjectCollection(data);
+              }
+              setState(() {});
             },
           ),
         ),

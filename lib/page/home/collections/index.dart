@@ -27,6 +27,7 @@ class _CollectionPageState extends State<CollectionPage> {
               return SubjectList(
                 items: subjects,
                 padding: EdgeInsets.fromLTRB(12, 56, 12, 12),
+                showCollection: false,
               );
             },
           ),

@@ -10,12 +10,14 @@ class SubjectList extends StatelessWidget {
   final List<SubjectCollection> items;
   final EdgeInsets padding;
   final void Function(SubjectCollection) onTapItem;
+  final bool showCollection;
 
   const SubjectList({
     Key key,
     this.items,
     this.padding,
     this.onTapItem,
+    this.showCollection = true,
   }) : super(key: key);
 
   Widget _buildItem(BuildContext context, int index) {
@@ -42,14 +44,33 @@ class SubjectList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  children: (data?.collection == null ? [] : [
-                    Text("已收藏"),
-                    SizedBox(width: 8),
-                  ])..add(Text(
-                      data?.subject?.name ?? "",
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.subtitle1,
-                    )),
+                  children: [
+                    Expanded(
+                      child: Text(
+                        data?.subject?.name ?? "",
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
+                    ),
+                  ]..addAll(showCollection && data?.collection != null
+                      ? [
+                          Container(
+                            margin: EdgeInsets.only(left: 8),
+                            padding: EdgeInsets.fromLTRB(6, 2, 6, 2),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(10000),
+                            ),
+                            child: Text(
+                              "已收藏",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ]
+                      : []),
                 ),
                 SizedBox(height: 8),
                 Text(
