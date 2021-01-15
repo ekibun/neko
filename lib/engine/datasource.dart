@@ -13,9 +13,11 @@ import 'package:neko/engine/http.dart';
 import 'package:flutter_iconv/flutter_iconv.dart';
 import 'webview.dart';
 
-class Provider {
+class DataSource {
   static IsolateQjs _engine;
-  static Map<String, Object> _providers = {};
+  static List<DataSourceInfo> _infos = [];
+  static Map<String, Object> _dataSource = {};
+
   static _methodHandler(String method, List args) {
     switch (method) {
       case "webview":
@@ -49,7 +51,19 @@ class Provider {
     return rootBundle.loadString(modulePath);
   };
 
+  static _ensureInfos() async {
+    if (_infos == null)
+      _infos = [
+        DataSourceInfo(
+          "bgm.tv",
+          searchSupport: [],
+          code: await rootBundle.loadString("js/provider/bgm.tv.js"),
+        ),
+      ];
+  }
+
   static _ensureEngine() async {
+    await _ensureInfos();
     if (_engine == null) {
       _engine = IsolateQjs(
         methodHandler: _methodHandler,
@@ -61,7 +75,7 @@ class Provider {
   }
 
   static reset() async {
-    _providers.clear();
+    _dataSource.clear();
     await _engine.close();
     _engine = null;
   }
@@ -72,7 +86,19 @@ class Provider {
   }
 
   static Future<Map> getProvider(String name) async {
-    return _providers[name] ??
+    return _dataSource[name] ??
         await _evaluate('import("@provider/$name")', "<loadProvider>");
   }
+}
+
+class DataSourceInfo {
+  String site;
+  List<int> searchSupport;
+  String code;
+
+  DataSourceInfo(
+    this.site, {
+    this.searchSupport = const [],
+    this.code = "",
+  });
 }

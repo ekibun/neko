@@ -8,16 +8,16 @@
 
 import 'dart:io';
 
-import 'package:neko/model/collection.dart';
 import 'package:neko/page/home/index.dart';
 import 'package:flutter/material.dart';
 import 'package:neko/page/search/index.dart';
 import 'package:neko/theme.dart';
 import 'package:provider/provider.dart';
 
+import 'engine/database.dart';
 import 'lifecycle.dart';
 
-void main() {
+void main() async {
   runApp(LifecycleWatcher(child: const MyApp()));
 }
 
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Provider(
-      create: (_) => CollectionModel(),
+      create: (_) => Database(),
       child: MaterialApp(
         title: 'neko',
         debugShowCheckedModeBanner: false,

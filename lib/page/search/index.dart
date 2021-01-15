@@ -9,10 +9,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_qjs/isolate.dart';
-import 'package:neko/engine/provider.dart';
+import 'package:neko/db/database.dart';
+import 'package:neko/engine/database.dart';
+import 'package:neko/engine/datasource.dart';
 import 'package:neko/view/subjectList.dart';
 import 'package:neko/widget/actionbar.dart';
 import 'package:neko/widget/ripple.dart';
+import 'package:provider/provider.dart';
+import 'dart:convert';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -24,7 +28,7 @@ class SearchPage extends StatefulWidget {
 class _SearchPageState extends State<SearchPage> {
   String searchKey = "";
   int searchPage = 0;
-  List<Map> searchResult = [];
+  List<SubjectCollection> searchResult = [];
   List<Completer> jobs = [];
   String provider = "bgm.tv";
 
@@ -39,12 +43,13 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {});
 
     var searchJob = Completer();
-    Provider.getProvider(provider).then((value) async {
+    final site = provider;
+    DataSource.getProvider(site).then((value) async {
       if (searchJob.isCompleted) return;
       if (value["search"] is IsolateJSFunction) {
         searchJob.complete(await value["search"].invoke([key, page]));
       } else {
-        searchJob.completeError("provider $provider.search is not a function");
+        searchJob.completeError("datasource $site.search is not a function");
       }
       jobs.remove(searchJob);
     });
@@ -52,7 +57,17 @@ class _SearchPageState extends State<SearchPage> {
     searchJob.future.then((value) {
       if (!(value is List)) throw Exception("return data error");
       (value as List).forEach((item) {
-        searchResult.add(item);
+        searchResult.add(SubjectCollection()
+          ..subject = Subject(
+            id: item["id"]?.toString() ?? "",
+            site: item["site"] ?? site,
+            subjectType: item["type"] ?? "",
+            name: item["name"],
+            image: jsonEncode(item["image"]),
+            summary: item["summary"],
+            score: item["score"],
+            tags: jsonEncode(item["tags"]),
+          ));
       });
       setState(() {});
     }, onError: (e) {
@@ -63,12 +78,25 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
+    SubjectDatabase subjectDatabase =
+        Provider.of<Database>(context, listen: false).subject;
     return Material(
       child: Stack(children: [
         SafeArea(
           child: SubjectList(
             items: searchResult,
             padding: EdgeInsets.fromLTRB(12, 60, 12, 12),
+            onTapItem: (data) {
+              final nowTime = DateTime.now();
+              subjectDatabase.insertSubjectCollection(data
+                ..collection = Collection(
+                  site: data.subject.site,
+                  id: data.subject.id,
+                  createTime: nowTime,
+                  updateTime: nowTime,
+                ));
+              // collectionBox.put(data['id'], data);
+            },
           ),
         ),
         ActionBar(children: [

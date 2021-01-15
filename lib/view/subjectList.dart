@@ -1,16 +1,21 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:neko/db/database.dart';
 import 'package:neko/widget/httpImage.dart';
 import 'package:neko/widget/ripple.dart';
 
 class SubjectList extends StatelessWidget {
-  final List<Map> items;
+  final List<SubjectCollection> items;
   final EdgeInsets padding;
+  final void Function(SubjectCollection) onTapItem;
 
   const SubjectList({
     Key key,
     this.items,
     this.padding,
+    this.onTapItem,
   }) : super(key: key);
 
   Widget _buildItem(BuildContext context, int index) {
@@ -20,11 +25,13 @@ class SubjectList extends StatelessWidget {
       borderless: false,
       borderRadius: BorderRadius.circular(8),
       backgroundColor: Theme.of(context).cardColor,
-      onTap: () {},
+      onTap: () {
+        onTapItem?.call(data);
+      },
       child: Row(
         children: [
           HttpImage(
-            req: data["cover"],
+            req: jsonDecode(data?.subject?.image ?? "") ?? {},
             borderRadius: BorderRadius.circular(6),
             width: 100,
             height: 100,
@@ -34,13 +41,19 @@ class SubjectList extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  data["name"] ?? "",
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.subtitle1,
+                Row(
+                  children: (data?.collection == null ? [] : [
+                    Text("已收藏"),
+                    SizedBox(width: 8),
+                  ])..add(Text(
+                      data?.subject?.name ?? "",
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.subtitle1,
+                    )),
                 ),
+                SizedBox(height: 8),
                 Text(
-                  data["summary"] ?? "",
+                  data?.subject?.summary ?? "",
                   softWrap: true,
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,

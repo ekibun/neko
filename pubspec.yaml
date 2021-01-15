@@ -33,10 +33,17 @@ dependencies:
   flutter_iconv:
     path: plugins/flutter_iconv
   dio: 3.0.10
+  moor: ^3.4.0
+  moor_ffi: ^0.8.0
+  path_provider: ^1.6.27
+  neko_desktop:
+    path: plugins/neko_desktop
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  moor_generator: ^3.4.0
+  build_runner: ^1.10.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

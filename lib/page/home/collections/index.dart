@@ -1,21 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:neko/model/collection.dart';
+import 'package:neko/db/database.dart';
+import 'package:neko/engine/database.dart';
 import 'package:neko/view/subjectList.dart';
 import 'package:neko/widget/actionbar.dart';
-import 'package:neko/widget/httpImage.dart';
 import 'package:neko/widget/ripple.dart';
 import 'package:provider/provider.dart';
 
-class CollectionPage extends StatelessWidget {
+class CollectionPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _CollectionPageState();
+}
+
+class _CollectionPageState extends State<CollectionPage> {
   @override
   Widget build(BuildContext context) {
+    SubjectDatabase subjectDatabase =
+        Provider.of<Database>(context, listen: false).subject;
+
     return Stack(
       children: [
         SafeArea(
-          child: Consumer<CollectionModel>(
-            builder: (context, model, child) {
+          child: StreamBuilder(
+            stream: subjectDatabase.watchCollections(),
+            builder: (context, snapshot) {
+              List<SubjectCollection> subjects = snapshot.data ?? [];
               return SubjectList(
-                items: model.lists,
+                items: subjects,
                 padding: EdgeInsets.fromLTRB(12, 56, 12, 12),
               );
             },

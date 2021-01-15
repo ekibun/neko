@@ -6,6 +6,6 @@
     path = plugins/flutter_webview
     url = https://github.com/ekibun/flutter_webview.git
 
-[submodule "plugins/flutter_webview"]
+[submodule "plugins/flutter_iconv"]
     path = plugins/flutter_iconv
     url = https://github.com/ekibun/flutter_iconv.git

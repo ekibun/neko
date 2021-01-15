@@ -30,7 +30,7 @@ export const search = async (key, page) => {
     return {
       id: id,
       name: itemDom.find('h3 a').first()?.text(),
-      cover: {
+      image: {
         url: imgDom && parseImageUrl($(imgDom)).replace(/\/[lcmgs]\//, '/m/'),
       },
       summary: itemDom.find(".info").first()?.text()?.replace(/^[\n ]/, '')
