@@ -21,7 +21,8 @@ class SubjectList extends StatelessWidget {
   }) : super(key: key);
 
   Widget _buildItem(BuildContext context, int index) {
-    var data = items[index];
+    final data = items[index];
+    final subjectType = data?.subject?.subjectType;
     return Ripple(
       padding: EdgeInsets.all(12),
       borderless: false,
@@ -47,31 +48,35 @@ class SubjectList extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        (data?.subject?.subjectType ?? "") +
-                            (data?.subject?.name ?? ""),
+                        data?.subject?.name ?? "",
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.subtitle1,
                       ),
                     ),
-                  ]..addAll(showCollection && data?.collection != null
-                      ? [
-                          Container(
-                            margin: EdgeInsets.only(left: 8),
-                            padding: EdgeInsets.fromLTRB(6, 2, 6, 2),
-                            decoration: BoxDecoration(
+                  ]
+                    ..addAll(showCollection && data?.collection != null
+                        ? [
+                            Icon(
+                              Icons.favorite,
                               color: Theme.of(context).primaryColor,
-                              borderRadius: BorderRadius.circular(10000),
+                              size: 16,
                             ),
-                            child: Text(
-                              "已收藏",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ]
-                      : []),
+                          ]
+                        : [])
+                    ..addAll([
+                      SizedBox(width: 6),
+                      Icon(
+                        subjectType == "book"
+                            ? Icons.book
+                            : subjectType == "music"
+                                ? Icons.music_note
+                                : subjectType == "video"
+                                    ? Icons.movie
+                                    : Icons.error,
+                        color: Colors.black38,
+                        size: 16,
+                      )
+                    ]),
                 ),
                 SizedBox(height: 8),
                 Text(

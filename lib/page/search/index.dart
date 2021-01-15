@@ -15,7 +15,6 @@ import 'package:neko/engine/datasource.dart';
 import 'package:neko/view/subjectList.dart';
 import 'package:neko/widget/actionbar.dart';
 import 'package:neko/widget/ripple.dart';
-import 'package:provider/provider.dart';
 import 'dart:convert';
 
 class SearchPage extends StatefulWidget {
@@ -36,7 +35,7 @@ class _SearchPageState extends State<SearchPage> {
     searchPage = page;
     searchKey = key;
     jobs.forEach((element) {
-      element.completeError("cancel"); // cancel
+      if (!element.isCompleted) element.completeError("cancel"); // cancel
     });
     jobs.clear();
     searchResult.clear();
@@ -48,6 +47,7 @@ class _SearchPageState extends State<SearchPage> {
       if (searchJob.isCompleted) return;
       if (value["search"] is IsolateJSFunction) {
         final searchData = await value["search"].invoke([key, page]);
+        if (searchJob.isCompleted) return;
         if (!(searchData is List)) throw Exception("return data error");
         final List<SubjectCollection> searchResultData =
             List<SubjectCollection>.from(
@@ -69,9 +69,9 @@ class _SearchPageState extends State<SearchPage> {
             orElse: () => null,
           );
         });
-        searchJob.complete(searchResultData);
+        if (!searchJob.isCompleted) searchJob.complete(searchResultData);
       } else {
-        searchJob.completeError("datasource $site.search is not a function");
+        if (!searchJob.isCompleted) searchJob.completeError("datasource $site.search is not a function");
       }
       jobs.remove(searchJob);
     });

@@ -27,7 +27,7 @@ export const search = async (key, page) => {
     const id = Number(itemDom.attr('id').split('_').pop());
     if (Number.isNaN(id)) return;
     const imgDom = itemDom.find('img')?.first();
-    const typeInt = Number(itemDom.find('.ico_subject_type')?.attr("class")?.split('_')?.pop());
+    const typeInt = /subject_type_(\d)/.exec(itemDom.find('.ico_subject_type')?.attr("class"))?.pop();
     return {
       id: id,
       name: itemDom.find('h3 a').first()?.text(),
