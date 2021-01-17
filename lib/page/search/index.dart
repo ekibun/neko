@@ -9,13 +9,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_qjs/isolate.dart';
+import 'package:neko/db/dataHelper.dart';
 import 'package:neko/db/database.dart';
 import 'package:neko/engine/database.dart';
 import 'package:neko/engine/datasource.dart';
 import 'package:neko/view/subjectList.dart';
 import 'package:neko/widget/actionbar.dart';
 import 'package:neko/widget/ripple.dart';
-import 'dart:convert';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -44,37 +44,27 @@ class _SearchPageState extends State<SearchPage> {
     var searchJob = Completer();
     final site = provider;
     DataSource.getProvider(site).then((value) async {
+      final searchData = await value["search"].invoke([key, page]);
       if (searchJob.isCompleted) return;
-      if (value["search"] is IsolateJSFunction) {
-        final searchData = await value["search"].invoke([key, page]);
-        if (searchJob.isCompleted) return;
-        if (!(searchData is List)) throw Exception("return data error");
-        final List<SubjectCollection> searchResultData =
-            List<SubjectCollection>.from(
-          searchData.map((item) => SubjectCollection()
-            ..subject = Subject(
-              id: item["id"]?.toString() ?? "",
-              site: item["site"] ?? site,
-              subjectType: item["type"] ?? "",
-              name: item["name"],
-              image: jsonEncode(item["image"]),
-              summary: item["summary"],
-            )),
+      if (!(searchData is List)) throw Exception("return data error");
+      final List<SubjectCollection> searchResultData =
+          List<SubjectCollection>.from(
+        searchData
+            .map((item) => SubjectCollection()..subject = subjectfromMap(item)),
+      );
+      final collections = await Database.subject
+          .getCollections(searchResultData.map((e) => e.subject));
+      searchResultData.forEach((e) {
+        e.collection = collections.firstWhere(
+          (c) => e.subject.site == c.site && e.subject.id == c.id,
+          orElse: () => null,
         );
-        final collections = await Database.subject
-            .getCollections(searchResultData.map((e) => e.subject));
-        searchResultData.forEach((e) {
-          e.collection = collections.firstWhere(
-            (c) => e.subject.site == c.site && e.subject.id == c.id,
-            orElse: () => null,
-          );
-        });
-        if (!searchJob.isCompleted) searchJob.complete(searchResultData);
-      } else {
-        if (!searchJob.isCompleted) searchJob.completeError("datasource $site.search is not a function");
-      }
-      jobs.remove(searchJob);
-    });
+      });
+      if (!searchJob.isCompleted) searchJob.complete(searchResultData);
+    }).catchError((error) {
+      if (searchJob.isCompleted) return;
+      searchJob.completeError(error);
+    }).whenComplete(() => jobs.remove(searchJob));
 
     searchJob.future.then((value) async {
       searchResult.addAll(value);

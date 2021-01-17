@@ -25,6 +25,9 @@ class _CollectionPageState extends State<CollectionPage> {
                 items: subjects,
                 padding: EdgeInsets.fromLTRB(12, 56, 12, 12),
                 showCollection: false,
+                onTapItem: (subject) {
+                  Navigator.of(context).pushNamed("subject", arguments: subject.subject);
+                },
               );
             },
           ),

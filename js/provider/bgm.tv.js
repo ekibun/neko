@@ -12,10 +12,10 @@ function parseImageUrl(imgDom) {
   return resolveUrl(imgDom.attr('src')
     ?? imgDom.attr('data-cfsrc')
     ?? /background-image:url\('([^']*)'\)/.exec(imgDom.attr('style'))?.splice(1, 1)
-  );
+  ).replace(/\/[lcmgs]\//, '/m/');
 }
 
-export const search = async (key, page) => {
+export async function search(key, page) {
   const rsp = await fetch(`https://bgm.tv/subject_search/${encodeURIComponent(key)}?page=${page}`, {
     headers: {
       'cookie': `chii_searchDateLine=${(new Date().getTime() / 1000 | 0) - 10}`
@@ -27,15 +27,34 @@ export const search = async (key, page) => {
     const id = Number(itemDom.attr('id').split('_').pop());
     if (Number.isNaN(id)) return;
     const imgDom = itemDom.find('img')?.first();
-    const typeInt = /subject_type_(\d)/.exec(itemDom.find('.ico_subject_type')?.attr("class"))?.pop();
+    const typeInt = /subject_type_(\d)/.exec(itemDom.find('.ico_subject_type')?.attr('class'))?.pop();
     return {
       id: id,
       name: itemDom.find('h3 a').first()?.text(),
       image: {
-        url: imgDom && parseImageUrl($(imgDom)).replace(/\/[lcmgs]\//, '/m/'),
+        url: imgDom && parseImageUrl($(imgDom)),
       },
-      summary: itemDom.find(".info").first()?.text()?.replace(/^[\n ]/, ''),
-      type: typeInt == 1 ? "book" : typeInt == 2 || typeInt == 6 ? "video" : typeInt == 3 ? "music" : undefined,
+      summary: itemDom.find('.info').first()?.text()?.replace(/^[\n ]/, ''),
+      type: { 1: 'book', 2: 'video', 3: 'music', 6: 'video' }[typeInt],
     };
   }).filter(v => v);
+}
+
+export async function getSubjectInfo(subject) {
+  const rsp = await fetch(`https://bgm.tv/subject/${subject.id}`);
+  const $ = cheerio.load(await rsp.text());
+  const typeText = $('#navMenuNeue .focus').text();
+  subject.name = $('.nameSingle> a')?.attr('title') ?? $('.nameSingle> a')?.text() ?? subject.name;
+  subject.type = { '动画': 'video', '书籍': 'book', '音乐': 'music', '三次元': 'video' }[typeText] ?? subject.type;
+  subject.summary = $('#subject_summary').text() ?? subject.summary;
+  subject.image = parseImageUrl($('.infobox img.cover')) ?? subject.image;
+  subject.tags = $('.subject_tag_section a span')?.toArray()?.map((tag) => $(tag).text()) ?? subject.tags;
+  subject.score = Number($('.global_score .number')?.text()) ?? subject.score;
+  subject.info = Object.fromEntries($('#infobox li').toArray().map((li) => {
+    const liDom = $(li);
+    const tip = liDom.find('span.tip')?.text() ?? "";
+    liDom.find('span.tip').remove();
+    return [tip, liDom.text()];
+  }));
+  return subject;
 }

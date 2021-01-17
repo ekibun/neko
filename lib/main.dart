@@ -11,6 +11,7 @@ import 'dart:io';
 import 'package:neko/page/home/index.dart';
 import 'package:flutter/material.dart';
 import 'package:neko/page/search/index.dart';
+import 'package:neko/page/subject/index.dart';
 import 'package:neko/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
         routes: {
           'home': (BuildContext context) => HomePage(),
           'search': (BuildContext context) => SearchPage(),
+          'subject': (BuildContext context) => SubjectPage(),
         },
         initialRoute: 'home',
       ),

@@ -73,7 +73,7 @@ class ActionBar extends StatelessWidget {
                           },
                         )
                       : Container(),
-                  ...children,
+                  ...(children ?? []),
                 ]),
                 child ?? SizedBox(),
               ]),
