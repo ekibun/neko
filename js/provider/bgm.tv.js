@@ -19,7 +19,7 @@ export async function search(key, page) {
       'cookie': `chii_searchDateLine=${(new Date().getTime() / 1000 | 0) - 10}`
     }
   });
-  return $(await rsp.text())
+  return HtmlParser(await rsp.text())
     .queryAll('.item')
     .map(item => {
       const id = Number(item.attr('id').split('_').pop());
@@ -41,19 +41,18 @@ export async function search(key, page) {
 export async function getSubjectInfo(subject) {
   const rsp = await fetch(`https://bgm.tv/subject/${subject.id}`);
 
-  // const $ = cheerio.load(await rsp.text());
-  // const typeText = $('#navMenuNeue .focus').text();
-  // subject.name = $('.nameSingle> a')?.attr('title') ?? $('.nameSingle> a')?.text() ?? subject.name;
-  // subject.type = { '动画': 'video', '书籍': 'book', '音乐': 'music', '三次元': 'video' }[typeText] ?? subject.type;
-  // subject.summary = $('#subject_summary').text() ?? subject.summary;
-  // subject.image = parseImageUrl($('.infobox img.cover')) ?? subject.image;
-  // subject.tags = $('.subject_tag_section a span')?.toArray()?.map((tag) => $(tag).text()) ?? subject.tags;
-  // subject.score = Number($('.global_score .number')?.text()) ?? subject.score;
-  // subject.info = Object.fromEntries($('#infobox li').toArray().map((li) => {
-  //   const liDom = $(li);
-  //   const tip = liDom.find('span.tip')?.text() ?? "";
-  //   liDom.find('span.tip').remove();
-  //   return [tip, liDom.text()];
-  // }));
-  // return subject;
+  const doc = HtmlParser(await rsp.text());
+  subject.name = doc.query('.nameSingle> a')?.attr('title') ?? doc.query('.nameSingle> a')?.text() ?? subject.name;
+  const typeText = doc.query('#navMenuNeue .focus').text();
+  subject.type = { '动画': 'video', '书籍': 'book', '音乐': 'music', '三次元': 'video' }[typeText] ?? subject.type;
+  subject.summary = doc.query('#subject_summary')?.text() ?? subject.summary;
+  subject.image = parseImageUrl(doc.query('.infobox img.cover')) ?? subject.image;
+  subject.tags = doc.queryAll('.subject_tag_section a span')?.map((tag) => tag.text()) ?? subject.tags;
+  subject.score = Number(doc.query('.global_score .number')?.text()) ?? subject.score;
+  subject.info = Object.fromEntries(doc.queryAll('#infobox li').map((li) => {
+    const tip = li.query('span.tip')?.text() ?? "";
+    li.query('span.tip').remove();
+    return [tip, li.text()];
+  }));
+  return subject;
 }

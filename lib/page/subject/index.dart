@@ -36,6 +36,7 @@ class _SubjectPage extends State<SubjectPage> {
     subjectUpdateJob = Completer();
     DataSource.getProvider(subjectInfo["site"]).then((value) async {
       final newInfo = await value["getSubjectInfo"].invoke([subjectInfo]);
+      print("done getSubjectInfo");
       assert(newInfo["site"] == subjectInfo["site"] &&
           newInfo["id"] == subjectInfo["id"]);
       if (!subjectUpdateJob.isCompleted) subjectUpdateJob.complete(newInfo);

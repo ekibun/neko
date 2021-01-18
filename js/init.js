@@ -140,46 +140,18 @@
     .map(v => "%" + v.toString(16))
     .join("").toUpperCase();
 
-  const print = (...args) => {
-    _dart("log", args)
-  };
-
-
-  const list = (list, clazz) => {
-    const length = _dart("list_length", [list]);
-    const r = [];
-    if (clazz) {
-      for (var i = 0; i < length; i++) {
-        r.push(new clazz(_dart("list_get", [list, i])));
+  function createClass(def) {
+    function DartObject(opaque) {
+      this.toString = () => `[object ${def.name}]`;
+      for (const method in def.methods) {
+        this[method] = (...methodArgs) => {
+          const dartRet = _dart(`${def.prefix}_${method}`, [opaque, ...methodArgs]);
+          if (def.methods[method]) return def.methods[method](DartObject, dartRet);
+          else return dartRet;
+        }
       }
-    }
-    else {
-      for (var i = 0; i < length; i++) {
-        r.push(_dart("list_get", [list, i]));
-      }
-    }
-    return r;
-  };
-
-  class Element {
-    constructor(element) {
-      this.element = element;
-    }
-    query = (query) => {
-      const element = _dart("css_query", [this.element, query]);
-      if (element) return new Element(element);
-      return null;
     };
-    queryAll = (query) => {
-      const elements = _dart("css_query_all", [this.element, query]);
-      if (elements) return list(elements, Element);
-      return null;
-    }
-    attr = (...attr) => _dart("css_attr", [this.element, ...attr]);
-    text = (...text) => _dart("css_text", [this.element, ...text]);
-    html = (...html) => _dart("css_html", [this.element, ...html]);
-    outerHtml = () => _dart("css_outer_html", [this.element]);
-    remove = () => _dart("css_remove", [this.element]);
+    return (...args) => new DartObject(_dart(def.prefix, args));
   }
 
   const globalProperties = {
@@ -188,7 +160,19 @@
     Request,
     Response,
     FormData,
-    $: (html) => new Element(_dart("css", [html])),
+    HtmlParser: createClass({
+      prefix: "html",
+      name: "Element",
+      methods: {
+        query: (ctor, dartRet) => dartRet && new ctor(dartRet),
+        queryAll: (ctor, dartRet) => dartRet.map((el) => new ctor(el)),
+        attr: 0,
+        text: 0,
+        html: 0,
+        outerHtml: 0,
+        remove: 0,
+      }
+    }),
     Xpath: (html) => {
       const xpathObject = _dart("xpath", [html]);
       return (xpath) => _dart("xpath_query", [xpathObject, xpath]);

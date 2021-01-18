@@ -13,45 +13,25 @@ import 'package:neko/engine/http.dart';
 import 'package:flutter_iconv/flutter_iconv.dart';
 import 'package:xpath_parse/xpath_selector.dart';
 import 'webview.dart';
-import 'package:html/parser.dart' as parser;
-import 'package:html/dom.dart' as dom;
+import 'wrapper.dart';
 
 class DataSource {
   static IsolateQjs _engine;
   static List<DataSourceInfo> _infos = [];
   static Map<String, Object> _dataSource = {};
 
+  static Map<String, ClassWrapper> _classWrappers = {
+    "html": HtmlParser(),
+  };
+
   static _methodHandler(String method, List args) {
+    List<String> classMethod = method.split('_');
+    ClassWrapper wrapper = _classWrappers[classMethod[0]];
+    if (wrapper != null) {
+      if (classMethod.length < 2) return wrapper.constructor(args);
+      return wrapper.methods[classMethod[1]](args[0], args.sublist(1));
+    }
     switch (method) {
-      case "list_length":
-        return (args[0] as List).length;
-      case "list_get":
-        return (args[0] as List)[args[1]];
-      case "css":
-        return parser.parse(args[0]).documentElement;
-      case "css_query":
-        return (args[0] as dom.Element).querySelector(args[1]);
-      case "css_query_all":
-        return (args[0] as dom.Element).querySelectorAll(args[1]);
-      case "css_attr":
-        if (args.length == 3) {
-          return (args[0] as dom.Element).attributes[args[1]] = args[2];
-        }
-        return (args[0] as dom.Element).attributes[args[1]];
-      case "css_text":
-        if (args.length == 2) {
-          return (args[0] as dom.Element).text = args[1];
-        }
-        return (args[0] as dom.Element).text;
-      case "css_html":
-        if (args.length == 2) {
-          return (args[0] as dom.Element).innerHtml = args[1];
-        }
-        return (args[0] as dom.Element).innerHtml;
-      case "css_outer_html":
-        return (args[0] as dom.Element).outerHtml;
-      case "css_remove":
-        return (args[0] as dom.Element).remove();
       case "webview":
         return webview(args[0], args[1]);
       case "encode":
@@ -81,7 +61,9 @@ class DataSource {
             ? "js/provider/" +
                 module.replaceAll(new RegExp(r"^@provider/|.js$"), "") +
                 ".js"
-            : "js/module/" + module.replaceFirst(new RegExp(r".js$"), "") + ".js";
+            : "js/module/" +
+                module.replaceFirst(new RegExp(r".js$"), "") +
+                ".js";
     return rootBundle.loadString(modulePath);
   };
 
