@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_qjs/isolate.dart';
 import 'package:neko/engine/http.dart';
 import 'package:flutter_iconv/flutter_iconv.dart';
+import 'package:xpath_parse/xpath_selector.dart';
 import 'webview.dart';
 
 class DataSource {
@@ -27,6 +28,10 @@ class DataSource {
       case "decode":
         return utf8.decode(convert(args[0], from: args[1], fatal: args[2]),
             allowMalformed: args[2]);
+      case "xpath":
+        return XPath.source(args[0]);
+      case "xpath_query":
+        return (args[0] as XPath).query(args[1]).list();
       case "fetch":
         return Http.fetch(args[0]);
       case "console":

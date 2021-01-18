@@ -36,6 +36,7 @@ dependencies:
   moor: ^3.4.0
   moor_ffi: ^0.8.0
   path_provider: ^1.6.27
+  xpath_parse: ^1.0.2
   neko_desktop:
     path: plugins/neko_desktop
 

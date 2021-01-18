@@ -29,7 +29,7 @@ class _SubjectPage extends State<SubjectPage> {
   }
 
   Completer subjectUpdateJob;
-  Future updateSubject() {
+  updateSubject() {
     if (subjectUpdateJob?.isCompleted == false) {
       subjectUpdateJob.completeError("cancel"); // cancel
     }
@@ -65,7 +65,7 @@ class _SubjectPage extends State<SubjectPage> {
         ),
         ActionBar(children: [
           Expanded(
-            child: Text(subjectInfo["name"]),
+            child: Text(subjectInfo != null ? subjectInfo["name"]: ""),
           ),
         ]),
       ]),
