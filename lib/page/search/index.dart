@@ -50,7 +50,7 @@ class _SearchPageState extends State<SearchPage> {
       final List<SubjectCollection> searchResultData =
           List<SubjectCollection>.from(
         searchData
-            .map((item) => SubjectCollection()..subject = subjectfromMap(item)),
+            .map((item) => SubjectCollection()..subject = subjectfromMap(item, site: provider)),
       );
       final collections = await Database.subject
           .getCollections(searchResultData.map((e) => e.subject));
