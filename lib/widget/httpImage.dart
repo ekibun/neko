@@ -13,6 +13,10 @@ class HttpImage extends StatelessWidget {
     this.height,
   }) : super(key: key);
 
+  static ImageProvider getImage(Map req) {
+    return NetworkImage(req["url"] ?? "");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -20,7 +24,7 @@ class HttpImage extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: NetworkImage(req["url"] ?? ""),
+          image: getImage(req),
           fit: BoxFit.cover,
         ),
         borderRadius: borderRadius,

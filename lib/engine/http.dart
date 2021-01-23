@@ -23,6 +23,15 @@ class Http {
         }
         return _dio;
       })();
+
+  static Map wrapReq(dynamic req) {
+    return req is Map
+        ? req
+        : {
+            "url": req.toString(),
+          };
+  }
+
   static _wrapBody(body) {
     if (body is List<int>) return Stream.fromIterable(body.map((e) => [e]));
     if (body is Map && body["__js_proto__"] == "FormData") {

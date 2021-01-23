@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:neko/db/database.dart';
+import 'package:neko/engine/http.dart';
+import 'package:neko/page/subject/subjectInfo.dart';
 import 'package:neko/widget/httpImage.dart';
 import 'package:neko/widget/ripple.dart';
 
@@ -34,7 +36,7 @@ class SubjectList extends StatelessWidget {
       child: Row(
         children: [
           HttpImage(
-            req: jsonDecode(data?.subject?.image ?? "") ?? {},
+            req: Http.wrapReq(jsonDecode(data?.subject?.image ?? "") ?? {}),
             borderRadius: BorderRadius.circular(6),
             width: 100,
             height: 100,
@@ -65,17 +67,7 @@ class SubjectList extends StatelessWidget {
                         : [])
                     ..addAll([
                       SizedBox(width: 6),
-                      Icon(
-                        subjectType == "book"
-                            ? Icons.book
-                            : subjectType == "music"
-                                ? Icons.music_note
-                                : subjectType == "video"
-                                    ? Icons.movie
-                                    : Icons.error,
-                        color: Colors.black38,
-                        size: 16,
-                      )
+                      subjectTypeIcon(subjectType ?? ""),
                     ]),
                 ),
                 SizedBox(height: 8),
@@ -99,6 +91,7 @@ class SubjectList extends StatelessWidget {
     return GridView.builder(
       clipBehavior: Clip.none,
       padding: padding,
+      physics: BouncingScrollPhysics(),
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 500,
         mainAxisExtent: 124,

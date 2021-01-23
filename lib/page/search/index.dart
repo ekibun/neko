@@ -49,8 +49,8 @@ class _SearchPageState extends State<SearchPage> {
       if (!(searchData is List)) throw Exception("return data error");
       final List<SubjectCollection> searchResultData =
           List<SubjectCollection>.from(
-        searchData
-            .map((item) => SubjectCollection()..subject = subjectfromMap(item, site: provider)),
+        searchData.map((item) =>
+            SubjectCollection()..subject = subjectfromMap(item, site: site)),
       );
       final collections = await Database.subject
           .getCollections(searchResultData.map((e) => e.subject));
@@ -84,28 +84,18 @@ class _SearchPageState extends State<SearchPage> {
             items: searchResult,
             padding: EdgeInsets.fromLTRB(12, 60, 12, 12),
             onTapItem: (data) async {
-              final nowTime = DateTime.now();
-              if (data.collection != null) {
-                await Database.subject.removeCollection(data.collection);
-                data.collection = null;
-              } else {
-                data.collection = Collection(
-                  site: data.subject.site,
-                  id: data.subject.id,
-                  createTime: nowTime,
-                  updateTime: nowTime,
-                );
-                await Database.subject.insertSubjectCollection(data);
-              }
-              setState(() {});
+              Navigator.of(context)
+                  .pushNamed("subject", arguments: data.subject);
             },
           ),
         ),
-        ActionBar(children: [
-          Expanded(
-            child: _buildSearchAction(context),
-          ),
-        ]),
+        GradientBackground(
+          child: ActionBar(children: [
+            Expanded(
+              child: _buildSearchAction(context),
+            ),
+          ]),
+        ),
       ]),
     );
   }
