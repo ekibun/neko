@@ -52,7 +52,7 @@ class _SearchPageState extends State<SearchPage> {
         searchData.map((item) =>
             SubjectCollection()..subject = subjectfromMap(item, site: site)),
       );
-      final collections = await Database.subject
+      final collections = await AppDatabase.subject
           .getCollections(searchResultData.map((e) => e.subject));
       searchResultData.forEach((e) {
         e.collection = collections.firstWhere(

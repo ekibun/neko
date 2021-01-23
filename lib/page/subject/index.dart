@@ -27,7 +27,7 @@ class _SubjectPage extends State<SubjectPage> {
     super.initState();
     Future.delayed(Duration.zero, () {
       final Subject subject = ModalRoute.of(context).settings.arguments;
-      Database.subject.getCollection(subject).then((value) {
+      AppDatabase.subject.getCollection(subject).then((value) {
         collection = value;
         setState(() {});
       });
@@ -127,7 +127,7 @@ class _SubjectPage extends State<SubjectPage> {
                               isCollected: collection != null,
                               onCollectTap: () {
                                 if (collection != null) {
-                                  Database.subject.removeCollection(collection);
+                                  AppDatabase.subject.removeCollection(collection);
                                   collection = null;
                                 } else {
                                   final subject = subjectfromMap(subjectInfo);
@@ -138,7 +138,7 @@ class _SubjectPage extends State<SubjectPage> {
                                     createTime: nowTime,
                                     updateTime: nowTime,
                                   );
-                                  Database.subject.insertSubjectCollection(
+                                  AppDatabase.subject.insertSubjectCollection(
                                       SubjectCollection()
                                         ..subject = subject
                                         ..collection = collection);

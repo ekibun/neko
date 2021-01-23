@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:neko/widget/ripple.dart';
-import 'package:neko/widget/theme.dart';
+
+import '../theme.dart';
 
 class ActionButton extends StatelessWidget {
   final void Function() onTap;
@@ -24,7 +25,7 @@ class ActionButton extends StatelessWidget {
             child: Icon(
               icon,
               size: 21,
-              color: ThemeUtil.isDarkMode(context) ? Colors.white54 : Colors.black54,
+              color: AppTheme.isDarkMode(context) ? Colors.white54 : Colors.black54,
             )),
       ),
     );

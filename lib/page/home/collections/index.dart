@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:neko/db/database.dart';
 import 'package:neko/engine/database.dart';
+import 'package:neko/theme.dart';
 import 'package:neko/view/subjectList.dart';
 import 'package:neko/widget/actionbar.dart';
 import 'package:neko/widget/ripple.dart';
+import 'package:neko/widget/rippleRouter.dart';
+import 'package:provider/provider.dart';
+
+import '../index.dart';
 
 class CollectionPage extends StatefulWidget {
   @override
@@ -17,7 +22,7 @@ class _CollectionPageState extends State<CollectionPage> {
       children: [
         SafeArea(
           child: StreamBuilder(
-            stream: Database.subject.watchCollections(),
+            stream: AppDatabase.subject.watchCollections(),
             builder: (context, snapshot) {
               List<SubjectCollection> subjects = snapshot.data ?? [];
               return SubjectList(
@@ -45,6 +50,22 @@ class _CollectionPageState extends State<CollectionPage> {
                   ),
                 ),
               ),
+              Builder(builder: (toggleContext) {
+                return ActionButton(
+                  icon: Theme.of(context).brightness == Brightness.light
+                      ? Icons.brightness_high
+                      : Icons.brightness_low,
+                  onTap: () {
+                    final appTheme =
+                        Provider.of<AppTheme>(context, listen: false);
+                    appTheme.themeMode =
+                        Theme.of(context).brightness == Brightness.light
+                            ? ThemeMode.dark
+                            : ThemeMode.light;
+                    appTheme.notifyListeners();
+                  },
+                );
+              }),
               ActionButton(
                 icon: Icons.search,
                 onTap: () {
@@ -67,7 +88,11 @@ class _CollectionPageState extends State<CollectionPage> {
                           Icon(
                             Icons.sort,
                             size: 21,
-                            color: Colors.black54,
+                            color: Theme.of(context)
+                                .textTheme
+                                .bodyText2
+                                .color
+                                .withOpacity(0.5),
                           ),
                         ],
                       )),

@@ -15,7 +15,6 @@ import 'package:neko/page/subject/index.dart';
 import 'package:neko/theme.dart';
 import 'package:provider/provider.dart';
 
-import 'engine/database.dart';
 import 'lifecycle.dart';
 
 void main() async {
@@ -27,28 +26,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Provider(
-      create: (_) => Database(),
-      child: MaterialApp(
-        title: 'neko',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-            appBarTheme: AppBarTheme(brightness: Brightness.dark, elevation: 0),
-            primaryColor: AppTheme.primaryColor,
-            accentColor: AppTheme.accentColor,
-            canvasColor: AppTheme.backgroundColor,
-            hintColor: AppTheme.primaryColor,
-            backgroundColor: Colors.transparent,
-            splashColor: AppTheme.accentColor.withAlpha(50),
-            primaryColorBrightness: Brightness.dark,
-            fontFamily: Platform.isWindows ? "Microsoft Yahei UI" : null),
-        routes: {
-          'home': (BuildContext context) => HomePage(),
-          'search': (BuildContext context) => SearchPage(),
-          'subject': (BuildContext context) => SubjectPage(),
-        },
-        initialRoute: 'home',
-      ),
-    );
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AppTheme>.value(value: AppTheme.instance),
+        ],
+        child: Consumer<AppTheme>(
+          builder: (context, appTheme, _) => MaterialApp(
+            title: 'neko',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.getThemeData(Brightness.light),
+            darkTheme: AppTheme.getThemeData(Brightness.dark),
+            themeMode: appTheme.themeMode,
+            routes: {
+              'home': (BuildContext context) => HomePage(),
+              'search': (BuildContext context) => SearchPage(),
+              'subject': (BuildContext context) => SubjectPage(),
+            },
+            initialRoute: 'home',
+          ),
+        ));
   }
 }
