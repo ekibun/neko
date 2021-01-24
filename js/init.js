@@ -5,9 +5,7 @@
  * @LastEditors: ekibun
  * @LastEditTime: 2020-08-29 21:50:56
  */
-(async () => {
-  const _dart = this.channel;
-
+async (_dart, _webview) => {
   class FormData {
     constructor(data) {
       const _data = data || {}
@@ -196,7 +194,7 @@
       return new Response(response);
     },
     webview: async (url, options) => {
-      return _dart("webview", [url, options || {}]);
+      return _webview(url, options || {});
     },
     encodeURI: (uri, encoding) => {
       const encoder = new _TextEncoder(encoding || "utf-8");
@@ -215,5 +213,4 @@
         writable: false
       }
     }))));
-  delete this.channel;
-})();
+};

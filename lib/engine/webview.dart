@@ -21,7 +21,7 @@ Future<dynamic> webview(String url, Map options) async {
             "Webview Call timeout 10 seconds after page completed.");
     }
     var callback = options[method];
-    if (callback != null) if ((await callback([args])) == true) {
+    if (callback != null) if ((await callback(args)) == true) {
       print(args);
       if (!c.isCompleted) c.complete(args);
     }

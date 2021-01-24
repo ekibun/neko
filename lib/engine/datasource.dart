@@ -32,8 +32,6 @@ class DataSource {
       return wrapper.methods[classMethod[1]](args[0], args.sublist(1));
     }
     switch (method) {
-      case "webview":
-        return webview(args[0], args[1]);
       case "encode":
         return convert(utf8.encode(args[0]), to: args[1], fatal: args[2]);
       case "decode":
@@ -85,8 +83,9 @@ class DataSource {
         moduleHandler: _moduleHandler,
         stackSize: 1024 * 1024,
       );
-      await _engine.setToGlobalObject("channel", _methodHandler);
-      await _engine.evaluate(await _moduleHandler("@init"), name: "<init>");
+      final init =
+          await _engine.evaluate(await _moduleHandler("@init"), name: "<init>");
+      await init(_methodHandler, await _engine.bind(webview));
     }
   }
 
