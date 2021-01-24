@@ -82,10 +82,10 @@ class DataSource {
     await _ensureInfos();
     if (_engine == null) {
       _engine = IsolateQjs(
-        methodHandler: _methodHandler,
         moduleHandler: _moduleHandler,
         stackSize: 1024 * 1024,
       );
+      await _engine.setToGlobalObject("channel", _methodHandler);
       await _engine.evaluate(await _moduleHandler("@init"), name: "<init>");
     }
   }
