@@ -393,6 +393,7 @@ class $SubjectsTable extends Subjects with TableInfo<$SubjectsTable, Subject> {
 class Collection extends DataClass implements Insertable<Collection> {
   final String site;
   final String id;
+  final String relate;
   final String lastViewEp;
   final int score;
   final String comment;
@@ -402,6 +403,7 @@ class Collection extends DataClass implements Insertable<Collection> {
   Collection(
       {@required this.site,
       @required this.id,
+      this.relate,
       this.lastViewEp,
       this.score,
       this.comment,
@@ -417,6 +419,8 @@ class Collection extends DataClass implements Insertable<Collection> {
     return Collection(
       site: stringType.mapFromDatabaseResponse(data['${effectivePrefix}site']),
       id: stringType.mapFromDatabaseResponse(data['${effectivePrefix}id']),
+      relate:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}relate']),
       lastViewEp: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}last_view_ep']),
       score: intType.mapFromDatabaseResponse(data['${effectivePrefix}score']),
@@ -437,6 +441,9 @@ class Collection extends DataClass implements Insertable<Collection> {
     }
     if (!nullToAbsent || id != null) {
       map['id'] = Variable<String>(id);
+    }
+    if (!nullToAbsent || relate != null) {
+      map['relate'] = Variable<String>(relate);
     }
     if (!nullToAbsent || lastViewEp != null) {
       map['last_view_ep'] = Variable<String>(lastViewEp);
@@ -463,6 +470,8 @@ class Collection extends DataClass implements Insertable<Collection> {
     return CollectionsCompanion(
       site: site == null && nullToAbsent ? const Value.absent() : Value(site),
       id: id == null && nullToAbsent ? const Value.absent() : Value(id),
+      relate:
+          relate == null && nullToAbsent ? const Value.absent() : Value(relate),
       lastViewEp: lastViewEp == null && nullToAbsent
           ? const Value.absent()
           : Value(lastViewEp),
@@ -487,6 +496,7 @@ class Collection extends DataClass implements Insertable<Collection> {
     return Collection(
       site: serializer.fromJson<String>(json['site']),
       id: serializer.fromJson<String>(json['id']),
+      relate: serializer.fromJson<String>(json['relate']),
       lastViewEp: serializer.fromJson<String>(json['lastViewEp']),
       score: serializer.fromJson<int>(json['score']),
       comment: serializer.fromJson<String>(json['comment']),
@@ -501,6 +511,7 @@ class Collection extends DataClass implements Insertable<Collection> {
     return <String, dynamic>{
       'site': serializer.toJson<String>(site),
       'id': serializer.toJson<String>(id),
+      'relate': serializer.toJson<String>(relate),
       'lastViewEp': serializer.toJson<String>(lastViewEp),
       'score': serializer.toJson<int>(score),
       'comment': serializer.toJson<String>(comment),
@@ -513,6 +524,7 @@ class Collection extends DataClass implements Insertable<Collection> {
   Collection copyWith(
           {String site,
           String id,
+          String relate,
           String lastViewEp,
           int score,
           String comment,
@@ -522,6 +534,7 @@ class Collection extends DataClass implements Insertable<Collection> {
       Collection(
         site: site ?? this.site,
         id: id ?? this.id,
+        relate: relate ?? this.relate,
         lastViewEp: lastViewEp ?? this.lastViewEp,
         score: score ?? this.score,
         comment: comment ?? this.comment,
@@ -534,6 +547,7 @@ class Collection extends DataClass implements Insertable<Collection> {
     return (StringBuffer('Collection(')
           ..write('site: $site, ')
           ..write('id: $id, ')
+          ..write('relate: $relate, ')
           ..write('lastViewEp: $lastViewEp, ')
           ..write('score: $score, ')
           ..write('comment: $comment, ')
@@ -550,21 +564,24 @@ class Collection extends DataClass implements Insertable<Collection> {
       $mrjc(
           id.hashCode,
           $mrjc(
-              lastViewEp.hashCode,
+              relate.hashCode,
               $mrjc(
-                  score.hashCode,
+                  lastViewEp.hashCode,
                   $mrjc(
-                      comment.hashCode,
+                      score.hashCode,
                       $mrjc(
-                          tags.hashCode,
+                          comment.hashCode,
                           $mrjc(
-                              createTime.hashCode, updateTime.hashCode))))))));
+                              tags.hashCode,
+                              $mrjc(createTime.hashCode,
+                                  updateTime.hashCode)))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
       (other is Collection &&
           other.site == this.site &&
           other.id == this.id &&
+          other.relate == this.relate &&
           other.lastViewEp == this.lastViewEp &&
           other.score == this.score &&
           other.comment == this.comment &&
@@ -576,6 +593,7 @@ class Collection extends DataClass implements Insertable<Collection> {
 class CollectionsCompanion extends UpdateCompanion<Collection> {
   final Value<String> site;
   final Value<String> id;
+  final Value<String> relate;
   final Value<String> lastViewEp;
   final Value<int> score;
   final Value<String> comment;
@@ -585,6 +603,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
   const CollectionsCompanion({
     this.site = const Value.absent(),
     this.id = const Value.absent(),
+    this.relate = const Value.absent(),
     this.lastViewEp = const Value.absent(),
     this.score = const Value.absent(),
     this.comment = const Value.absent(),
@@ -595,6 +614,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
   CollectionsCompanion.insert({
     @required String site,
     @required String id,
+    this.relate = const Value.absent(),
     this.lastViewEp = const Value.absent(),
     this.score = const Value.absent(),
     this.comment = const Value.absent(),
@@ -608,6 +628,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
   static Insertable<Collection> custom({
     Expression<String> site,
     Expression<String> id,
+    Expression<String> relate,
     Expression<String> lastViewEp,
     Expression<int> score,
     Expression<String> comment,
@@ -618,6 +639,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     return RawValuesInsertable({
       if (site != null) 'site': site,
       if (id != null) 'id': id,
+      if (relate != null) 'relate': relate,
       if (lastViewEp != null) 'last_view_ep': lastViewEp,
       if (score != null) 'score': score,
       if (comment != null) 'comment': comment,
@@ -630,6 +652,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
   CollectionsCompanion copyWith(
       {Value<String> site,
       Value<String> id,
+      Value<String> relate,
       Value<String> lastViewEp,
       Value<int> score,
       Value<String> comment,
@@ -639,6 +662,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     return CollectionsCompanion(
       site: site ?? this.site,
       id: id ?? this.id,
+      relate: relate ?? this.relate,
       lastViewEp: lastViewEp ?? this.lastViewEp,
       score: score ?? this.score,
       comment: comment ?? this.comment,
@@ -656,6 +680,9 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     }
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (relate.present) {
+      map['relate'] = Variable<String>(relate.value);
     }
     if (lastViewEp.present) {
       map['last_view_ep'] = Variable<String>(lastViewEp.value);
@@ -683,6 +710,7 @@ class CollectionsCompanion extends UpdateCompanion<Collection> {
     return (StringBuffer('CollectionsCompanion(')
           ..write('site: $site, ')
           ..write('id: $id, ')
+          ..write('relate: $relate, ')
           ..write('lastViewEp: $lastViewEp, ')
           ..write('score: $score, ')
           ..write('comment: $comment, ')
@@ -720,6 +748,18 @@ class $CollectionsTable extends Collections
       'id',
       $tableName,
       false,
+    );
+  }
+
+  final VerificationMeta _relateMeta = const VerificationMeta('relate');
+  GeneratedTextColumn _relate;
+  @override
+  GeneratedTextColumn get relate => _relate ??= _constructRelate();
+  GeneratedTextColumn _constructRelate() {
+    return GeneratedTextColumn(
+      'relate',
+      $tableName,
+      true,
     );
   }
 
@@ -798,8 +838,17 @@ class $CollectionsTable extends Collections
   }
 
   @override
-  List<GeneratedColumn> get $columns =>
-      [site, id, lastViewEp, score, comment, tags, createTime, updateTime];
+  List<GeneratedColumn> get $columns => [
+        site,
+        id,
+        relate,
+        lastViewEp,
+        score,
+        comment,
+        tags,
+        createTime,
+        updateTime
+      ];
   @override
   $CollectionsTable get asDslTable => this;
   @override
@@ -821,6 +870,10 @@ class $CollectionsTable extends Collections
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id'], _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('relate')) {
+      context.handle(_relateMeta,
+          relate.isAcceptableOrUnknown(data['relate'], _relateMeta));
     }
     if (data.containsKey('last_view_ep')) {
       context.handle(

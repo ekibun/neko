@@ -8,7 +8,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_qjs/isolate.dart';
 import 'package:neko/db/dataHelper.dart';
 import 'package:neko/db/database.dart';
 import 'package:neko/engine/database.dart';
@@ -29,7 +28,7 @@ class _SearchPageState extends State<SearchPage> {
   int searchPage = 0;
   List<SubjectCollection> searchResult = [];
   List<Completer> jobs = [];
-  String provider = "bgm.tv";
+  String provider = "acfun.cn";
 
   search(String key, int page) {
     searchPage = page;
@@ -44,7 +43,7 @@ class _SearchPageState extends State<SearchPage> {
     var searchJob = Completer();
     final site = provider;
     DataSource.getProvider(site).then((value) async {
-      final searchData = await value["search"].invoke([key, page]);
+      final searchData = await value["search"](key, page);
       if (searchJob.isCompleted) return;
       if (!(searchData is List)) throw Exception("return data error");
       final List<SubjectCollection> searchResultData =

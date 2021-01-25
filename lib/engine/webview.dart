@@ -13,7 +13,6 @@ Future<dynamic> webview(String url, Map options) async {
   Completer c = new Completer();
   var webview = FlutterWebview();
   await webview.setMethodHandler((String method, dynamic args) async {
-    print("$method($args)");
     if (method == "onNavigationCompleted") {
       await Future.delayed(Duration(seconds: 10));
       if (!c.isCompleted)
@@ -22,7 +21,6 @@ Future<dynamic> webview(String url, Map options) async {
     }
     var callback = options[method];
     if (callback != null) if ((await callback(args)) == true) {
-      print(args);
       if (!c.isCompleted) c.complete(args);
     }
     return;

@@ -11,6 +11,8 @@ class Collections extends Table {
 
   TextColumn get site => text()();
   TextColumn get id => text()();
+
+  TextColumn get relate => text().nullable()();
   
   TextColumn get lastViewEp => text().nullable()();
 

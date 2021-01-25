@@ -47,41 +47,21 @@ class SubjectInfo extends StatelessWidget {
                 ),
                 SizedBox(width: 12),
                 Expanded(
-                  child: Row(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              info["name"] ?? "",
-                              style: Theme.of(context).textTheme.subtitle1,
-                            ),
-                            SizedBox(height: 6),
-                            Row(
-                              children: [
-                                subjectTypeIcon(info["type"]),
-                                SizedBox(width: 4),
-                                Text(info["site"] ?? ""),
-                              ],
-                            ),
-                          ],
-                        ),
+                      Text(
+                        info["name"] ?? "",
+                        style: Theme.of(context).textTheme.subtitle1,
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      SizedBox(height: 6),
+                      Row(
                         children: [
-                          Text(
-                            (info["score"] ?? "-").toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .headline4
-                                .copyWith(
-                                    color: Theme.of(context).primaryColor),
-                          ),
+                          subjectTypeIcon(info["type"]),
+                          SizedBox(width: 4),
+                          Text(info["site"] ?? ""),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -112,26 +92,6 @@ class SubjectInfo extends StatelessWidget {
               ),
             ),
           ],
-        ),
-        SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          child: Wrap(
-            spacing: 8,
-            children: [
-              ...(info["tags"] ?? []).map((v) {
-                return Ripple(
-                  onTap: () {},
-                  borderless: false,
-                  borderRadius: BorderRadius.circular(1000),
-                  backgroundColor: Colors.black12,
-                  padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
-                  child: Text(v),
-                );
-              })
-            ],
-          ),
         ),
         SizedBox(height: 8),
         Text(info["summary"]),

@@ -11,6 +11,8 @@ import 'package:neko/page/subject/subjectInfo.dart';
 import 'package:neko/widget/actionbar.dart';
 import 'package:neko/widget/httpImage.dart';
 
+import 'episodesInfo.dart';
+
 class SubjectPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -20,6 +22,7 @@ class SubjectPage extends StatefulWidget {
 
 class _SubjectPage extends State<SubjectPage> {
   Map subjectInfo;
+  Map episodeData;
   Collection collection;
 
   @override
@@ -38,23 +41,50 @@ class _SubjectPage extends State<SubjectPage> {
     });
   }
 
-  Completer subjectUpdateJob;
+  List<Completer> jobs = [];
   updateSubject() {
-    if (subjectUpdateJob?.isCompleted == false) {
-      subjectUpdateJob.completeError("cancel"); // cancel
-    }
-    subjectUpdateJob = Completer();
+    jobs.forEach((element) {
+      if (!element.isCompleted) element.completeError("cancel"); // cancel
+    });
+    jobs.clear();
+    // subject update
+    final subjectUpdateJob = Completer();
     DataSource.getProvider(subjectInfo["site"]).then((value) async {
-      final newInfo = await value["getSubjectInfo"].invoke([subjectInfo]);
+      final newInfo = await value["getSubjectInfo"](subjectInfo);
       if (!subjectUpdateJob.isCompleted) subjectUpdateJob.complete(newInfo);
     }).catchError((error) {
-      print(error);
       if (subjectUpdateJob.isCompleted) return;
       subjectUpdateJob.completeError(error);
-    });
+    }).whenComplete(() => jobs.remove(subjectUpdateJob));
     subjectUpdateJob.future.then((value) {
       setState(() {
         subjectInfo = value;
+      });
+    }).catchError((error) {
+      print("subject update error:\n$error");
+    });
+    jobs.add(subjectUpdateJob);
+  }
+
+  Completer getEpisodeJob;
+  getEpisode(Map ep) {
+    if (getEpisodeJob?.isCompleted == false) {
+      getEpisodeJob.completeError("cancel"); // cancel
+    }
+    getEpisodeJob = Completer();
+    DataSource.getProvider(subjectInfo["site"]).then((value) async {
+      final newInfo = await value["getEpisode"](ep);
+      if (!getEpisodeJob.isCompleted) getEpisodeJob.complete(newInfo);
+    }).catchError((error) {
+      if (getEpisodeJob.isCompleted) return;
+      getEpisodeJob.completeError(error);
+    });
+    getEpisodeJob.future.then((value) {
+      setState(() {
+        episodeData = {
+          "ep": ep,
+          "data": value,
+        };
       });
     }).catchError((error) {
       print("subject update error:\n$error");
@@ -63,6 +93,7 @@ class _SubjectPage extends State<SubjectPage> {
 
   @override
   Widget build(BuildContext context) {
+    final info = subjectInfo ?? {};
     return Material(
       child: Stack(
         children: [
@@ -71,7 +102,7 @@ class _SubjectPage extends State<SubjectPage> {
             width: double.maxFinite,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: HttpImage.getImage(Http.wrapReq(subjectInfo["image"])),
+                image: HttpImage.getImage(Http.wrapReq(info["image"])),
                 fit: BoxFit.cover,
               ),
             ),
@@ -91,7 +122,7 @@ class _SubjectPage extends State<SubjectPage> {
               child: ActionBar(children: [
                 Expanded(
                   child: Text(
-                    subjectInfo != null ? subjectInfo["name"] : "",
+                    info["name"] ?? "",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context)
@@ -120,14 +151,16 @@ class _SubjectPage extends State<SubjectPage> {
                             BoxConstraints(minHeight: constraint.maxHeight),
                         padding: EdgeInsets.all(12),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             SubjectInfo(
-                              info: subjectInfo ?? {},
+                              info: info,
                               isCollected: collection != null,
                               onCollectTap: () {
                                 if (collection != null) {
-                                  AppDatabase.subject.removeCollection(collection);
+                                  AppDatabase.subject
+                                      .removeCollection(collection);
                                   collection = null;
                                 } else {
                                   final subject = subjectfromMap(subjectInfo);
@@ -146,7 +179,22 @@ class _SubjectPage extends State<SubjectPage> {
                                 setState(() {});
                               },
                             ),
-                          ],
+                          ]
+                            ..addAll(info["eps"] is List
+                                ? [
+                                    EpisodeInfo(
+                                      eps: info["eps"],
+                                      onEpisodeTap: (ep) {
+                                        getEpisode(ep);
+                                      },
+                                    ),
+                                  ]
+                                : [])
+                            ..addAll(episodeData == null
+                                ? []
+                                : [
+                                    Text(episodeData.toString()),
+                                  ]),
                         ),
                       ),
                     ),
